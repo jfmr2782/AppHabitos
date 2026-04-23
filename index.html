@@ -646,7 +646,6 @@ function HabitsScreen({ habits, curProg, allProg, onToggle, onEdit, onDelete, on
       </div>
       <div style={{ flex:1,overflow:'auto' }}>
       <div style={{ padding:'16px 24px 100px',animation:'tabSlide 0.25s ease' }} ref={listRef}>
-        <div style={{ marginBottom:0 }}>
 
         {habits.map((h,i)=>(
           <div
@@ -992,9 +991,8 @@ function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, on
       </div>
       <div style={{ flex:1,overflow:'auto' }}>
       <div style={{ padding:'16px 24px 100px',animation:'tabSlide 0.25s ease' }}>
-        <div style={{ marginBottom:0 }}>
 
-        {/* Active categories */}
+        {/* Active categories */
         {categories.map((cat,i)=>(
           <CategoryCard key={cat.id} cat={cat} goals={activeGoals} onPress={()=>onSelectCat(cat)} index={i}/>
         ))}
