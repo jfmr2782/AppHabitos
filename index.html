@@ -633,18 +633,20 @@ function HabitsScreen({ habits, curProg, allProg, onToggle, onEdit, onDelete, on
   };
 
   return (
-    <div style={{ height:'100%',overflow:'auto',paddingTop:'calc(env(safe-area-inset-top, 0px) + 62px)',position:'relative' }}>
-      <div style={{ padding:'0 24px 100px',animation:'tabSlide 0.25s ease' }} ref={listRef}>
-        <div style={{ marginBottom:28 }}>
-          <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>{days[today.getDay()]} · {today.getDate()} {months[today.getMonth()]}</div>
-          <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,lineHeight:1.1 }}>{allDone?'¡Todo listo! ✦':'Mis hábitos'}</div>
-          <div style={{ marginTop:16,display:'flex',alignItems:'center',gap:12 }}>
-            <div style={{ flex:1,height:1,background:'rgba(255,255,255,0.1)',position:'relative',overflow:'hidden' }}>
-              <div style={{ position:'absolute',left:0,top:0,height:'100%',width:`${totalGoal>0?(totalDone/totalGoal)*100:0}%`,background:allDone?'#7BE8B0':'rgba(255,255,255,0.5)',transition:'width 0.6s ease,background 0.4s' }}/>
-            </div>
-            <span style={{ fontSize:11,color:pColor(totalDone,totalGoal),fontWeight:600,flexShrink:0,letterSpacing:0.2 }}>{completedCount}/{habits.length}</span>
+    <div style={{ height:'100%',display:'flex',flexDirection:'column',position:'relative' }}>
+      <div style={{ flexShrink:0,paddingTop:'calc(env(safe-area-inset-top, 0px) + 14px)',padding:'calc(env(safe-area-inset-top, 0px) + 14px) 24px 12px',background:'#0c0c12',borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ fontSize:10,fontWeight:400,color:'rgba(255,255,255,0.4)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:3 }}>{days[today.getDay()]} · {today.getDate()} {months[today.getMonth()]}</div>
+        <div style={{ fontSize:22,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.4,lineHeight:1.2,marginBottom:10 }}>{allDone?'¡Todo listo! ✦':'Mis hábitos'}</div>
+        <div style={{ display:'flex',alignItems:'center',gap:12 }}>
+          <div style={{ flex:1,height:1,background:'rgba(255,255,255,0.1)',position:'relative',overflow:'hidden' }}>
+            <div style={{ position:'absolute',left:0,top:0,height:'100%',width:`${totalGoal>0?(totalDone/totalGoal)*100:0}%`,background:allDone?'#7BE8B0':'rgba(255,255,255,0.5)',transition:'width 0.6s ease,background 0.4s' }}/>
           </div>
+          <span style={{ fontSize:11,color:pColor(totalDone,totalGoal),fontWeight:600,flexShrink:0,letterSpacing:0.2 }}>{completedCount}/{habits.length}</span>
         </div>
+      </div>
+      <div style={{ flex:1,overflow:'auto' }}>
+      <div style={{ padding:'16px 24px 100px',animation:'tabSlide 0.25s ease' }} ref={listRef}>
+        <div style={{ marginBottom:0 }}>
 
         {habits.map((h,i)=>(
           <div
@@ -689,6 +691,7 @@ function HabitsScreen({ habits, curProg, allProg, onToggle, onEdit, onDelete, on
             Nuevo hábito
           </button>
         </div>
+      </div>
       </div>
 
       {modal==='add'&&<HabitModal onSave={data=>{onAdd(data);setModal(null);}} onClose={()=>setModal(null)}/>}
@@ -976,18 +979,20 @@ function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, on
   };
 
   return (
-    <div style={{ height:'100%',overflow:'auto',paddingTop:'calc(env(safe-area-inset-top, 0px) + 62px)',position:'relative' }}>
-      <div style={{ padding:'0 24px 100px',animation:'tabSlide 0.25s ease' }}>
-        <div style={{ marginBottom:28 }}>
-          <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>Progreso total</div>
-          <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,marginBottom:16 }}>Metas</div>
-          <div style={{ display:'flex',alignItems:'center',gap:12 }}>
-            <div style={{ flex:1,height:1,background:'rgba(255,255,255,0.1)',position:'relative',overflow:'hidden' }}>
-              <div style={{ position:'absolute',left:0,top:0,height:'100%',width:`${pct*100}%`,background:bc.bar,transition:'width 0.6s ease' }}/>
-            </div>
-            <span style={{ fontSize:11,color:bc.text,fontWeight:600,flexShrink:0 }}>{Math.round(pct*100)}%</span>
+    <div style={{ height:'100%',display:'flex',flexDirection:'column',position:'relative' }}>
+      <div style={{ flexShrink:0,paddingTop:'calc(env(safe-area-inset-top, 0px) + 14px)',padding:'calc(env(safe-area-inset-top, 0px) + 14px) 24px 12px',background:'#0c0c12',borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ fontSize:10,fontWeight:400,color:'rgba(255,255,255,0.4)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:3 }}>Progreso total</div>
+        <div style={{ fontSize:22,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.4,marginBottom:10 }}>Metas</div>
+        <div style={{ display:'flex',alignItems:'center',gap:12 }}>
+          <div style={{ flex:1,height:1,background:'rgba(255,255,255,0.1)',position:'relative',overflow:'hidden' }}>
+            <div style={{ position:'absolute',left:0,top:0,height:'100%',width:`${pct*100}%`,background:bc.bar,transition:'width 0.6s ease' }}/>
           </div>
+          <span style={{ fontSize:11,color:bc.text,fontWeight:600,flexShrink:0 }}>{Math.round(pct*100)}%</span>
         </div>
+      </div>
+      <div style={{ flex:1,overflow:'auto' }}>
+      <div style={{ padding:'16px 24px 100px',animation:'tabSlide 0.25s ease' }}>
+        <div style={{ marginBottom:0 }}>
 
         {/* Active categories */}
         {categories.map((cat,i)=>(
@@ -1042,6 +1047,7 @@ function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, on
             )}
           </div>
         )}
+      </div>
       </div>
 
       {addModal&&<GoalModal categories={categories} onSave={data=>{onAddGoal(data);setAddModal(false);}} onClose={()=>setAddModal(false)}/>}
@@ -1785,21 +1791,24 @@ function App() {
         )}
 
         {tab==='stats'&&(
-          <div style={{ flex:1,overflow:'auto',paddingTop:'calc(env(safe-area-inset-top, 0px) + 62px)' }}>
-            <div style={{ padding:'0 24px 18px' }}>
-              <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>Resumen</div>
-              <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,marginBottom:24 }}>Progreso</div>
+          <div style={{ flex:1,display:'flex',flexDirection:'column',overflow:'hidden' }}>
+            <div style={{ flexShrink:0,paddingTop:'calc(env(safe-area-inset-top, 0px) + 14px)',padding:'calc(env(safe-area-inset-top, 0px) + 14px) 24px 12px',background:'#0c0c12',borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize:10,fontWeight:400,color:'rgba(255,255,255,0.4)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:3 }}>Resumen</div>
+              <div style={{ fontSize:22,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.4 }}>Progreso</div>
             </div>
-            <StatsScreen habits={habits} goals={goals} categories={categories} allProgress={allProg}/>
+            <div style={{ flex:1,overflow:'auto' }}>
+              <StatsScreen habits={habits} goals={goals} categories={categories} allProgress={allProg}/>
+            </div>
           </div>
         )}
 
         {tab==='ajustes'&&(
-          <div style={{ flex:1,overflow:'auto',paddingTop:'calc(env(safe-area-inset-top, 0px) + 62px)' }}>
-            <div style={{ padding:'0 24px 18px' }}>
-              <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>Datos</div>
-              <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,marginBottom:28 }}>Ajustes</div>
+          <div style={{ flex:1,display:'flex',flexDirection:'column',overflow:'hidden' }}>
+            <div style={{ flexShrink:0,paddingTop:'calc(env(safe-area-inset-top, 0px) + 14px)',padding:'calc(env(safe-area-inset-top, 0px) + 14px) 24px 12px',background:'#0c0c12',borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize:10,fontWeight:400,color:'rgba(255,255,255,0.4)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:3 }}>Datos</div>
+              <div style={{ fontSize:22,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.4 }}>Ajustes</div>
             </div>
+            <div style={{ flex:1,overflow:'auto' }}>
 
             {/* Backup section */}
             <div style={{ padding:'0 20px',display:'flex',flexDirection:'column',gap:12 }}>
@@ -1857,6 +1866,7 @@ function App() {
               </div>
 
             </div>
+            </div>
           </div>
         )}
 
@@ -1867,7 +1877,7 @@ function App() {
         )}
 
         {/* Tab bar — 4 tabs */}
-        <div style={{ position:'absolute',bottom:0,left:0,right:0,display:'flex',alignItems:'flex-start',paddingTop:14,paddingBottom:'env(safe-area-inset-bottom, 8px)',background:'rgba(12,12,18,0.94)',backdropFilter:'blur(20px)',borderTop:'1px solid rgba(255,255,255,0.07)',zIndex:50 }}>
+        <div style={{ position:'absolute',bottom:0,left:0,right:0,display:'flex',alignItems:'flex-start',paddingTop:14,paddingBottom:'max(env(safe-area-inset-bottom), 20px)',background:'rgba(12,12,18,0.94)',backdropFilter:'blur(20px)',borderTop:'1px solid rgba(255,255,255,0.07)',zIndex:50 }}>
           {TABS.map(t=>{
             const isActive = tab===t.id;
             const accentColor = t.id==='metas'?'#E8B87B':t.id==='stats'?'#7BE8B0':t.id==='ajustes'?'#E87BB0':'#7B8FE8';
