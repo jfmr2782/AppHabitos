@@ -39,7 +39,9 @@
 
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-html,body { width:100%; height:100%; background:#0a0a11; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; }
+html { width:100%; height:100%; background:#0c0c12; }
+body { width:100%; height:100%; background:#0c0c12; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; overscroll-behavior:none; overflow:hidden; position:fixed; width:100%; }
+#root { width:100%; height:100%; position:fixed; inset:0; background:#0c0c12; }
 ::-webkit-scrollbar { display:none; }
 @keyframes dotIn { 0%{transform:scale(0.3);opacity:0} 60%{transform:scale(1.4)} 80%{transform:scale(0.92)} 100%{transform:scale(1);opacity:1} }
 @keyframes dotOut { 0%{transform:scale(1)} 40%{transform:scale(0.5)} 100%{transform:scale(1)} }
@@ -155,7 +157,7 @@ function IOSNavBar({ title = 'Title', dark = false, trailingIcon = true }) {
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 10,
-      paddingTop: 62, paddingBottom: 10, position: 'relative', zIndex: 5,
+      paddingTop: 'env(safe-area-inset-top, 62px)', paddingBottom: 10, position: 'relative', zIndex: 5,
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -586,7 +588,7 @@ function HabitsScreen({ habits, curProg, allProg, onToggle, onEdit, onDelete, on
   const days  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const months= ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   return (
-    <div style={{ height:'100%',overflow:'auto',paddingTop:62,position:'relative' }}>
+    <div style={{ height:'100%',overflow:'auto',paddingTop:'env(safe-area-inset-top, 62px)',position:'relative' }}>
       <div style={{ padding:'0 24px 100px',animation:'tabSlide 0.25s ease' }}>
         <div style={{ marginBottom:28 }}>
           <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>{days[today.getDay()]} · {today.getDate()} {months[today.getMonth()]}</div>
@@ -803,7 +805,7 @@ function CategoryDetail({ cat, goals, onBack, onAdd, onEdit, onDelete, onUpdate 
   const bc  = barColor(pct);
 
   return (
-    <div style={{ height:'100%',overflow:'auto',paddingTop:62,position:'relative' }}>
+    <div style={{ height:'100%',overflow:'auto',paddingTop:'env(safe-area-inset-top, 62px)',position:'relative' }}>
       <div style={{ padding:'0 24px 100px',animation:'slideInRight 0.28s ease' }}>
         {/* Back + Header */}
         <button onClick={onBack} style={{ display:'flex',alignItems:'center',gap:6,background:'none',border:'none',color:'rgba(255,255,255,0.45)',fontSize:13,fontWeight:400,cursor:'pointer',marginBottom:16,padding:0 }}>
@@ -868,7 +870,7 @@ function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, on
   };
 
   return (
-    <div style={{ height:'100%',overflow:'auto',paddingTop:62,position:'relative' }}>
+    <div style={{ height:'100%',overflow:'auto',paddingTop:'env(safe-area-inset-top, 62px)',position:'relative' }}>
       <div style={{ padding:'0 24px 100px',animation:'tabSlide 0.25s ease' }}>
         <div style={{ marginBottom:28 }}>
           <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>Progreso total</div>
@@ -1642,8 +1644,8 @@ function App() {
   };
 
   return (
-    <IOSDevice dark={true} width={390} height={844}>
-      <div style={{ height:'100%',display:'flex',flexDirection:'column',position:'relative',background:'#0c0c12',fontFamily:"'Inter',sans-serif",WebkitFontSmoothing:'antialiased' }}>
+    <div style={{ width:'100%',height:'100%',position:'fixed',inset:0,overflow:'hidden',touchAction:'none' }}>
+      <div style={{ height:'100%',display:'flex',flexDirection:'column',position:'relative',background:'#0c0c12',fontFamily:"'Inter',sans-serif",WebkitFontSmoothing:'antialiased',overflow:'hidden' }}>
 
         {!onboarded && <SplashScreen onStart={()=>setOnboarded(true)}/>}
         {/* Pulse ambient glow */}
@@ -1674,7 +1676,7 @@ function App() {
         )}
 
         {tab==='stats'&&(
-          <div style={{ flex:1,overflow:'auto',paddingTop:62 }}>
+          <div style={{ flex:1,overflow:'auto',paddingTop:'env(safe-area-inset-top, 62px)' }}>
             <div style={{ padding:'0 24px 18px' }}>
               <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>Resumen</div>
               <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,marginBottom:24 }}>Progreso</div>
@@ -1684,7 +1686,7 @@ function App() {
         )}
 
         {tab==='ajustes'&&(
-          <div style={{ flex:1,overflow:'auto',paddingTop:62 }}>
+          <div style={{ flex:1,overflow:'auto',paddingTop:'env(safe-area-inset-top, 62px)' }}>
             <div style={{ padding:'0 24px 18px' }}>
               <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>Datos</div>
               <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,marginBottom:28 }}>Ajustes</div>
@@ -1769,16 +1771,12 @@ function App() {
           })}
         </div>
       </div>
-    </IOSDevice>
+    </div>
   );
 }
 
 function Canvas() {
-  return (
-    <div style={{ minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse 80% 60% at 50% 40%, #14112a 0%, #090910 65%)',padding:32 }}>
-      <App/>
-    </div>
-  );
+  return <App/>;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<Canvas/>);
