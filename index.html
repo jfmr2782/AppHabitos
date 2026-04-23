@@ -3,18 +3,13 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>AppHábitos</title>
-
-<!-- PWA / pantalla completa iPhone -->
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Hábitos"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#0c0c12"/>
-
-<!-- Ícono para pantalla de inicio -->
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230c0c12'/%3E%3Ccircle cx='90' cy='75' r='32' fill='none' stroke='%237B8FE8' stroke-width='4'/%3E%3Ccircle cx='90' cy='75' r='18' fill='%237B8FE8' opacity='0.8'/%3E%3Crect x='54' y='128' width='18' height='18' rx='9' fill='%237B8FE8'/%3E%3Crect x='81' y='128' width='18' height='18' rx='9' fill='%237B8FE8'/%3E%3Crect x='108' y='128' width='18' height='18' rx='9' fill='rgba(255,255,255,0.2)'/%3E%3C/svg%3E"/>
-
+<title>AppHábitos</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <template id="__bundler_thumbnail" data-bg-color="#0c0c12">
   <svg viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
@@ -40,7 +35,7 @@
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html { width:100%; height:100%; background:#0c0c12; }
-body { width:100%; height:100%; background:#0c0c12; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; overscroll-behavior:none; overflow:hidden; position:fixed; width:100%; }
+body { width:100%; height:100%; background:#0c0c12; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; overscroll-behavior:none; overflow:hidden; position:fixed; }
 #root { width:100%; height:100%; position:fixed; inset:0; background:#0c0c12; }
 ::-webkit-scrollbar { display:none; }
 @keyframes dotIn { 0%{transform:scale(0.3);opacity:0} 60%{transform:scale(1.4)} 80%{transform:scale(0.92)} 100%{transform:scale(1);opacity:1} }
@@ -157,7 +152,7 @@ function IOSNavBar({ title = 'Title', dark = false, trailingIcon = true }) {
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 10,
-      paddingTop: 'env(safe-area-inset-top, 62px)', paddingBottom: 10, position: 'relative', zIndex: 5,
+      paddingTop: 62, paddingBottom: 10, position: 'relative', zIndex: 5,
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -579,63 +574,37 @@ function HabitModal({ initial, onSave, onClose }) {
 }
 
 function HabitsScreen({ habits, curProg, allProg, onToggle, onEdit, onDelete, onAdd, onReorder }) {
-  const [modal, setModal]         = useState(null);
-  const [dragIdx, setDragIdx]     = useState(null);
-  const [overIdx, setOverIdx]     = useState(null);
-  const dragItem                  = useRef(null);
-  const listRef                   = useRef(null);
-  const rowRefs                   = useRef([]);
-
+  const [modal, setModal] = useState(null);
   const totalDone      = habits.reduce((s,h)=>s+(curProg[h.id]?.filter(Boolean).length||0),0);
   const totalGoal      = habits.reduce((s,h)=>s+h.goal,0);
   const completedCount = habits.filter(h=>(curProg[h.id]?.filter(Boolean).length||0)>=h.goal).length;
   const allDone        = habits.length>0&&completedCount===habits.length;
-  const today  = new Date();
-  const days   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const today = new Date();
+  const days  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const months= ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const dragItem = useRef(null);
+  const rowRefs  = useRef([]);
+  const [dragIdx, setDragIdx] = useState(null);
+  const [overIdx, setOverIdx] = useState(null);
 
-  const getIndexAtY = (y) => {
+  const getIdxAtY = (y) => {
     let found = habits.length - 1;
-    rowRefs.current.forEach((el, i) => {
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      if (y < rect.top + rect.height / 2) {
-        found = Math.min(found, i);
-      }
-    });
+    rowRefs.current.forEach((el,i)=>{ if(!el) return; const r=el.getBoundingClientRect(); if(y<r.top+r.height/2) found=Math.min(found,i); });
     return found;
   };
-
-  const handleTouchStart = (e, i) => {
-    dragItem.current = i;
-    setDragIdx(i);
-    setOverIdx(i);
-  };
-
-  const handleTouchMove = (e) => {
-    if (dragItem.current === null) return;
-    e.preventDefault();
-    const touch = e.touches[0];
-    const idx = getIndexAtY(touch.clientY);
-    setOverIdx(idx);
-  };
-
-  const handleTouchEnd = () => {
-    if (dragItem.current !== null && overIdx !== null && overIdx !== dragItem.current) {
-      const newOrder = [...habits];
-      const [moved] = newOrder.splice(dragItem.current, 1);
-      newOrder.splice(overIdx, 0, moved);
-      onReorder(newOrder);
+  const onTouchStart = (e,i) => { dragItem.current=i; setDragIdx(i); setOverIdx(i); };
+  const onTouchMove  = (e) => { if(dragItem.current===null) return; e.preventDefault(); setOverIdx(getIdxAtY(e.touches[0].clientY)); };
+  const onTouchEnd   = () => {
+    if(dragItem.current!==null && overIdx!==null && overIdx!==dragItem.current){
+      const n=[...habits]; const [m]=n.splice(dragItem.current,1); n.splice(overIdx,0,m); onReorder(n);
     }
-    dragItem.current = null;
-    setDragIdx(null);
-    setOverIdx(null);
+    dragItem.current=null; setDragIdx(null); setOverIdx(null);
   };
 
   return (
-    <div style={{ height:'100%',display:'flex',flexDirection:'column',position:'relative' }}>
-      <div style={{ flexShrink:0,paddingTop:'calc(env(safe-area-inset-top, 0px) + 14px)',padding:'calc(env(safe-area-inset-top, 0px) + 14px) 24px 12px',background:'#0c0c12',borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ fontSize:10,fontWeight:400,color:'rgba(255,255,255,0.4)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:3 }}>{days[today.getDay()]} · {today.getDate()} {months[today.getMonth()]}</div>
+    <div style={{ height:'100%',display:'flex',flexDirection:'column' }}>
+      <div style={{ flexShrink:0,padding:'calc(env(safe-area-inset-top, 0px) + 14px) 24px 12px',background:'#0c0c12',borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ fontSize:10,color:'rgba(255,255,255,0.4)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:3 }}>{days[today.getDay()]} · {today.getDate()} {months[today.getMonth()]}</div>
         <div style={{ fontSize:22,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.4,lineHeight:1.2,marginBottom:10 }}>{allDone?'¡Todo listo! ✦':'Mis hábitos'}</div>
         <div style={{ display:'flex',alignItems:'center',gap:12 }}>
           <div style={{ flex:1,height:1,background:'rgba(255,255,255,0.1)',position:'relative',overflow:'hidden' }}>
@@ -645,54 +614,30 @@ function HabitsScreen({ habits, curProg, allProg, onToggle, onEdit, onDelete, on
         </div>
       </div>
       <div style={{ flex:1,overflow:'auto' }}>
-      <div style={{ padding:'16px 24px 100px',animation:'tabSlide 0.25s ease' }} ref={listRef}>
-
-        {habits.map((h,i)=>(
-          <div
-            key={h.id}
-            ref={el=>rowRefs.current[i]=el}
-            style={{
-              opacity: dragIdx===i ? 0.4 : 1,
-              transform: overIdx===i&&dragIdx!==null&&dragIdx!==i ? 'translateY(-4px)' : 'none',
-              transition: 'opacity 0.2s, transform 0.15s',
-              display:'flex', alignItems:'center', gap:8,
-            }}
-          >
-            {/* Handle drag */}
-            <div
-              onTouchStart={e=>handleTouchStart(e,i)}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              style={{ padding:'8px 4px', cursor:'grab', touchAction:'none', flexShrink:0 }}
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <circle cx="4" cy="3" r="1.5" fill="rgba(255,255,255,0.25)"/>
-                <circle cx="10" cy="3" r="1.5" fill="rgba(255,255,255,0.25)"/>
-                <circle cx="4" cy="7" r="1.5" fill="rgba(255,255,255,0.25)"/>
-                <circle cx="10" cy="7" r="1.5" fill="rgba(255,255,255,0.25)"/>
-                <circle cx="4" cy="11" r="1.5" fill="rgba(255,255,255,0.25)"/>
-                <circle cx="10" cy="11" r="1.5" fill="rgba(255,255,255,0.25)"/>
-              </svg>
+        <div style={{ padding:'8px 24px 100px' }}>
+          {habits.map((h,i)=>(
+            <div key={h.id} ref={el=>rowRefs.current[i]=el} style={{ opacity:dragIdx===i?0.4:1,transform:overIdx===i&&dragIdx!==null&&dragIdx!==i?'translateY(-4px)':'none',transition:'opacity 0.2s,transform 0.15s',display:'flex',alignItems:'center',gap:8 }}>
+              <div onTouchStart={e=>onTouchStart(e,i)} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} style={{ padding:'8px 4px',cursor:'grab',touchAction:'none',flexShrink:0 }}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="4" cy="3" r="1.5" fill="rgba(255,255,255,0.25)"/><circle cx="10" cy="3" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                  <circle cx="4" cy="7" r="1.5" fill="rgba(255,255,255,0.25)"/><circle cx="10" cy="7" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                  <circle cx="4" cy="11" r="1.5" fill="rgba(255,255,255,0.25)"/><circle cx="10" cy="11" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                </svg>
+              </div>
+              <div style={{ flex:1 }}>
+                <HabitRow habit={h} progress={Array.from({length:h.goal},(_,j)=>curProg[h.id]?.[j]||false)} onToggle={onToggle} onEdit={h=>setModal(h)} onDelete={onDelete} index={i}/>
+              </div>
             </div>
-            <div style={{ flex:1 }}>
-              <HabitRow habit={h}
-                progress={Array.from({length:h.goal},(_,j)=>curProg[h.id]?.[j]||false)}
-                onToggle={onToggle} onEdit={h=>setModal(h)} onDelete={onDelete} index={i}/>
-            </div>
+          ))}
+          {habits.length===0&&<div style={{ paddingTop:48,textAlign:'center',color:'rgba(255,255,255,0.2)' }}><div style={{ fontSize:32,marginBottom:12,opacity:0.4 }}>🌱</div><div style={{ fontSize:14,fontWeight:300 }}>Sin hábitos todavía</div></div>}
+          <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)',paddingTop:16,marginTop:habits.length>0?4:0 }}>
+            <button onClick={()=>setModal('add')} style={{ width:'100%',height:44,background:'transparent',border:'none',color:'rgba(255,255,255,0.38)',fontSize:13,fontWeight:400,cursor:'pointer',display:'flex',alignItems:'center',gap:10 }}>
+              <span style={{ width:20,height:20,borderRadius:'50%',border:'1px solid rgba(255,255,255,0.22)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:200,flexShrink:0 }}>+</span>
+              Nuevo hábito
+            </button>
           </div>
-        ))}
-
-        {habits.length===0&&<div style={{ paddingTop:48,textAlign:'center',color:'rgba(255,255,255,0.2)',animation:'rowIn 0.4s ease' }}><div style={{ fontSize:32,marginBottom:12,opacity:0.4 }}>🌱</div><div style={{ fontSize:14,fontWeight:300 }}>Sin hábitos todavía</div></div>}
-
-        <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)',paddingTop:16,marginTop:habits.length>0?4:0 }}>
-          <button onClick={()=>setModal('add')} style={{ width:'100%',height:44,background:'transparent',border:'none',color:'rgba(255,255,255,0.38)',fontSize:13,fontWeight:400,cursor:'pointer',display:'flex',alignItems:'center',gap:10 }}>
-            <span style={{ width:20,height:20,borderRadius:'50%',border:'1px solid rgba(255,255,255,0.22)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:200,flexShrink:0 }}>+</span>
-            Nuevo hábito
-          </button>
         </div>
       </div>
-      </div>
-
       {modal==='add'&&<HabitModal onSave={data=>{onAdd(data);setModal(null);}} onClose={()=>setModal(null)}/>}
       {modal&&modal!=='add'&&<HabitModal initial={modal} onSave={data=>{onEdit(modal,data);setModal(null);}} onClose={()=>setModal(null)}/>}
     </div>
@@ -881,7 +826,7 @@ function CategoryDetail({ cat, goals, onBack, onAdd, onEdit, onDelete, onUpdate 
   const bc  = barColor(pct);
 
   return (
-    <div style={{ height:'100%',overflow:'auto',paddingTop:'calc(env(safe-area-inset-top, 0px) + 62px)',position:'relative' }}>
+    <div style={{ height:'100%',overflow:'auto',paddingTop:62,position:'relative' }}>
       <div style={{ padding:'0 24px 100px',animation:'slideInRight 0.28s ease' }}>
         {/* Back + Header */}
         <button onClick={onBack} style={{ display:'flex',alignItems:'center',gap:6,background:'none',border:'none',color:'rgba(255,255,255,0.45)',fontSize:13,fontWeight:400,cursor:'pointer',marginBottom:16,padding:0 }}>
@@ -926,11 +871,9 @@ function CategoryDetail({ cat, goals, onBack, onAdd, onEdit, onDelete, onUpdate 
 }
 
 // Main Metas screen (categories list)
-function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, onDeleteGoal, onUpdateGoal, onReorder }) {
-  const [addModal, setAddModal]       = useState(false);
+function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, onDeleteGoal, onUpdateGoal }) {
+  const [addModal, setAddModal] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
-  const dragItem  = useRef(null);
-  const rowRefs   = useRef([]);
 
   const activeGoals    = goals.filter(g=>!g.completedAt);
   const completedGoals = goals.filter(g=>g.completedAt).sort((a,b)=>b.completedAt-a.completedAt);
@@ -940,36 +883,6 @@ function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, on
   const pct      = totalTar>0?Math.min(totalCur/totalTar,1):0;
   const bc       = barColor(pct);
 
-  const [dragIdx, setDragIdx] = useState(null);
-  const [overIdx, setOverIdx] = useState(null);
-
-  const getIndexAtY = (y) => {
-    let found = activeGoals.length - 1;
-    rowRefs.current.forEach((el, i) => {
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      if (y < rect.top + rect.height / 2) found = Math.min(found, i);
-    });
-    return found;
-  };
-
-  const handleTouchStart = (e, i) => { dragItem.current = i; setDragIdx(i); setOverIdx(i); };
-  const handleTouchMove  = (e) => {
-    if (dragItem.current === null) return;
-    e.preventDefault();
-    setOverIdx(getIndexAtY(e.touches[0].clientY));
-  };
-  const handleTouchEnd = () => {
-    if (dragItem.current !== null && overIdx !== null && overIdx !== dragItem.current) {
-      // reorder only within activeGoals, keep completed at end
-      const newActive = [...activeGoals];
-      const [moved] = newActive.splice(dragItem.current, 1);
-      newActive.splice(overIdx, 0, moved);
-      onReorder([...newActive, ...completedGoals]);
-    }
-    dragItem.current = null; setDragIdx(null); setOverIdx(null);
-  };
-
   const fmtDate = (ts) => {
     if (!ts) return '';
     const d = new Date(ts);
@@ -978,9 +891,9 @@ function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, on
   };
 
   return (
-    <div style={{ height:'100%',display:'flex',flexDirection:'column',position:'relative' }}>
-      <div style={{ flexShrink:0,paddingTop:'calc(env(safe-area-inset-top, 0px) + 14px)',padding:'calc(env(safe-area-inset-top, 0px) + 14px) 24px 12px',background:'#0c0c12',borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ fontSize:10,fontWeight:400,color:'rgba(255,255,255,0.4)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:3 }}>Progreso total</div>
+    <div style={{ height:'100%',display:'flex',flexDirection:'column' }}>
+      <div style={{ flexShrink:0,padding:'calc(env(safe-area-inset-top, 0px) + 14px) 24px 12px',background:'#0c0c12',borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ fontSize:10,color:'rgba(255,255,255,0.4)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:3 }}>Progreso total</div>
         <div style={{ fontSize:22,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.4,marginBottom:10 }}>Metas</div>
         <div style={{ display:'flex',alignItems:'center',gap:12 }}>
           <div style={{ flex:1,height:1,background:'rgba(255,255,255,0.1)',position:'relative',overflow:'hidden' }}>
@@ -990,9 +903,9 @@ function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, on
         </div>
       </div>
       <div style={{ flex:1,overflow:'auto' }}>
-      <div style={{ padding:'16px 24px 100px',animation:'tabSlide 0.25s ease' }}>
+      <div style={{ padding:'8px 24px 100px',animation:'tabSlide 0.25s ease' }}>
 
-        {/* Active categories */
+        {/* Active categories */}
         {categories.map((cat,i)=>(
           <CategoryCard key={cat.id} cat={cat} goals={activeGoals} onPress={()=>onSelectCat(cat)} index={i}/>
         ))}
@@ -1046,9 +959,9 @@ function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, on
           </div>
         )}
       </div>
-      </div>
 
       {addModal&&<GoalModal categories={categories} onSave={data=>{onAddGoal(data);setAddModal(false);}} onClose={()=>setAddModal(false)}/>}
+      </div>
     </div>
   );
 }
@@ -1718,7 +1631,6 @@ function App() {
   const handleEditGoal   = g=>setGoals(p=>p.map(x=>x.id===g.id?g:x));
   const handleDeleteGoal = id=>setGoals(p=>p.filter(g=>g.id!==id));
   const handleUpdateGoal = (id,newVal)=>setGoals(p=>p.map(g=>{ if(g.id!==id) return g; const newCur=Math.min(newVal,g.target); const justCompleted=newCur>=g.target&&!g.completedAt; return {...g,current:newCur,...(justCompleted?{completedAt:Date.now()}:{})}; }));
-  const handleReorderGoals = newOrder => setGoals(newOrder);
 
   const TABS = [
     { id:'habits',  label:'Hábitos' },
@@ -1727,7 +1639,6 @@ function App() {
     { id:'ajustes', label:'Ajustes' },
   ];
 
-  // ── Export / Import helpers ──────────────────────────────────
   const handleExport = () => {
     const data = { habits, allProgress: allProg, goals, onboarded, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1737,7 +1648,6 @@ function App() {
     a.href = url; a.download = `apphabitos_backup_${date}.json`; a.click();
     URL.revokeObjectURL(url);
   };
-
   const handleImport = (e) => {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
@@ -1757,7 +1667,7 @@ function App() {
 
   return (
     <div style={{ width:'100%',height:'100%',position:'fixed',inset:0,overflow:'hidden',touchAction:'none' }}>
-      <div style={{ height:'100%',display:'flex',flexDirection:'column',position:'relative',background:'#0c0c12',fontFamily:"'Inter',sans-serif",WebkitFontSmoothing:'antialiased',overflow:'hidden' }}>
+      <div style={{ height:'100%',display:'flex',flexDirection:'column',position:'relative',background:'#0c0c12',fontFamily:"'Inter',sans-serif",WebkitFontSmoothing:'antialiased' }}>
 
         {!onboarded && <SplashScreen onStart={()=>setOnboarded(true)}/>}
         {/* Pulse ambient glow */}
@@ -1775,8 +1685,7 @@ function App() {
             onAddGoal={handleAddGoal}
             onEditGoal={handleEditGoal}
             onDeleteGoal={handleDeleteGoal}
-            onUpdateGoal={handleUpdateGoal}
-            onReorder={handleReorderGoals}/>
+            onUpdateGoal={handleUpdateGoal}/>
         )}
 
         {tab==='metas'&&selectedCat&&(
@@ -1790,8 +1699,8 @@ function App() {
 
         {tab==='stats'&&(
           <div style={{ flex:1,display:'flex',flexDirection:'column',overflow:'hidden' }}>
-            <div style={{ flexShrink:0,paddingTop:'calc(env(safe-area-inset-top, 0px) + 14px)',padding:'calc(env(safe-area-inset-top, 0px) + 14px) 24px 12px',background:'#0c0c12',borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ fontSize:10,fontWeight:400,color:'rgba(255,255,255,0.4)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:3 }}>Resumen</div>
+            <div style={{ flexShrink:0,padding:'calc(env(safe-area-inset-top, 0px) + 14px) 24px 12px',background:'#0c0c12',borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize:10,color:'rgba(255,255,255,0.4)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:3 }}>Resumen</div>
               <div style={{ fontSize:22,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.4 }}>Progreso</div>
             </div>
             <div style={{ flex:1,overflow:'auto' }}>
@@ -1802,79 +1711,40 @@ function App() {
 
         {tab==='ajustes'&&(
           <div style={{ flex:1,display:'flex',flexDirection:'column',overflow:'hidden' }}>
-            <div style={{ flexShrink:0,paddingTop:'calc(env(safe-area-inset-top, 0px) + 14px)',padding:'calc(env(safe-area-inset-top, 0px) + 14px) 24px 12px',background:'#0c0c12',borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ fontSize:10,fontWeight:400,color:'rgba(255,255,255,0.4)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:3 }}>Datos</div>
+            <div style={{ flexShrink:0,padding:'calc(env(safe-area-inset-top, 0px) + 14px) 24px 12px',background:'#0c0c12',borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize:10,color:'rgba(255,255,255,0.4)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:3 }}>Datos</div>
               <div style={{ fontSize:22,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.4 }}>Ajustes</div>
             </div>
-            <div style={{ flex:1,overflow:'auto' }}>
-
-            {/* Backup section */}
-            <div style={{ padding:'0 20px',display:'flex',flexDirection:'column',gap:12 }}>
-
-              {/* Info card */}
-              <div style={{ background:'rgba(123,143,232,0.08)',border:'1px solid rgba(123,143,232,0.18)',borderRadius:18,padding:'14px 16px',marginBottom:4 }}>
-                <div style={{ fontSize:12,color:'rgba(255,255,255,0.5)',lineHeight:1.6 }}>
-                  Tu progreso se guarda automáticamente en este dispositivo. Usa los botones de abajo para hacer una copia de seguridad o restaurar en otro dispositivo.
-                </div>
+            <div style={{ flex:1,overflow:'auto',padding:'16px 20px 100px',display:'flex',flexDirection:'column',gap:12 }}>
+              <div style={{ background:'rgba(123,143,232,0.08)',border:'1px solid rgba(123,143,232,0.18)',borderRadius:18,padding:'14px 16px' }}>
+                <div style={{ fontSize:12,color:'rgba(255,255,255,0.5)',lineHeight:1.6 }}>Tu progreso se guarda automáticamente. Usa estos botones para hacer copias de seguridad o restaurar en otro dispositivo.</div>
               </div>
-
-              {/* Exportar */}
-              <button onClick={handleExport} style={{
-                width:'100%',height:54,borderRadius:16,border:'none',cursor:'pointer',
-                background:'linear-gradient(135deg,rgba(123,143,232,0.25),rgba(123,143,232,0.12))',
-                borderTop:'1px solid rgba(123,143,232,0.3)',
-                color:'#fff',fontSize:15,fontWeight:500,letterSpacing:-0.2,
-                display:'flex',alignItems:'center',justifyContent:'center',gap:10,
-              }}>
-                <span style={{ fontSize:20 }}>📤</span>
-                Exportar copia de seguridad
+              <button onClick={handleExport} style={{ width:'100%',height:54,borderRadius:16,border:'none',cursor:'pointer',background:'linear-gradient(135deg,rgba(123,143,232,0.25),rgba(123,143,232,0.12))',borderTop:'1px solid rgba(123,143,232,0.3)',color:'#fff',fontSize:15,fontWeight:500,display:'flex',alignItems:'center',justifyContent:'center',gap:10 }}>
+                <span style={{ fontSize:20 }}>📤</span>Exportar copia de seguridad
               </button>
-
-              {/* Importar */}
-              <label style={{
-                width:'100%',height:54,borderRadius:16,cursor:'pointer',
-                background:'rgba(255,255,255,0.05)',
-                border:'1px solid rgba(255,255,255,0.1)',
-                color:'rgba(255,255,255,0.7)',fontSize:15,fontWeight:400,letterSpacing:-0.2,
-                display:'flex',alignItems:'center',justifyContent:'center',gap:10,
-                boxSizing:'border-box',
-              }}>
-                <span style={{ fontSize:20 }}>📥</span>
-                Restaurar desde archivo
+              <label style={{ width:'100%',height:54,borderRadius:16,cursor:'pointer',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',color:'rgba(255,255,255,0.7)',fontSize:15,display:'flex',alignItems:'center',justifyContent:'center',gap:10,boxSizing:'border-box' }}>
+                <span style={{ fontSize:20 }}>📥</span>Restaurar desde archivo
                 <input type="file" accept=".json" onChange={handleImport} style={{ display:'none' }}/>
               </label>
-
-              {/* Stats del backup */}
-              <div style={{ marginTop:8,padding:'12px 16px',background:'rgba(255,255,255,0.03)',borderRadius:14,border:'1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ padding:'12px 16px',background:'rgba(255,255,255,0.03)',borderRadius:14,border:'1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ fontSize:12,color:'rgba(255,255,255,0.35)',marginBottom:8 }}>Estado actual</div>
                 <div style={{ display:'flex',gap:20 }}>
-                  <div style={{ textAlign:'center' }}>
-                    <div style={{ fontSize:22,fontWeight:600,color:'#7B8FE8' }}>{habits.length}</div>
-                    <div style={{ fontSize:11,color:'rgba(255,255,255,0.4)' }}>Hábitos</div>
-                  </div>
-                  <div style={{ textAlign:'center' }}>
-                    <div style={{ fontSize:22,fontWeight:600,color:'#E8B87B' }}>{goals.length}</div>
-                    <div style={{ fontSize:11,color:'rgba(255,255,255,0.4)' }}>Metas</div>
-                  </div>
-                  <div style={{ textAlign:'center' }}>
-                    <div style={{ fontSize:22,fontWeight:600,color:'#7BE8B0' }}>{Object.keys(allProg).length}</div>
-                    <div style={{ fontSize:11,color:'rgba(255,255,255,0.4)' }}>Semanas</div>
-                  </div>
+                  <div style={{ textAlign:'center' }}><div style={{ fontSize:22,fontWeight:600,color:'#7B8FE8' }}>{habits.length}</div><div style={{ fontSize:11,color:'rgba(255,255,255,0.4)' }}>Hábitos</div></div>
+                  <div style={{ textAlign:'center' }}><div style={{ fontSize:22,fontWeight:600,color:'#E8B87B' }}>{goals.length}</div><div style={{ fontSize:11,color:'rgba(255,255,255,0.4)' }}>Metas</div></div>
+                  <div style={{ textAlign:'center' }}><div style={{ fontSize:22,fontWeight:600,color:'#7BE8B0' }}>{Object.keys(allProg).length}</div><div style={{ fontSize:11,color:'rgba(255,255,255,0.4)' }}>Semanas</div></div>
                 </div>
               </div>
-
-            </div>
             </div>
           </div>
         )}
 
-        {/* Goal modal from category detail */}
+        {/* Goal modal from category detail */}}
         {goalModal&&(
           <GoalModal catId={goalModal.catId} initial={goalModal.id?goalModal:null} categories={categories}
             onSave={data=>{handleAddGoal({...data,createdAt:Date.now()});setGoalModal(null);}} onClose={()=>setGoalModal(null)}/>
         )}
 
-        {/* Tab bar — 4 tabs */}
+        {/* Tab bar */}
         <div style={{ position:'absolute',bottom:0,left:0,right:0,display:'flex',alignItems:'flex-start',paddingTop:14,paddingBottom:'max(env(safe-area-inset-bottom), 20px)',background:'rgba(12,12,18,0.94)',backdropFilter:'blur(20px)',borderTop:'1px solid rgba(255,255,255,0.07)',zIndex:50 }}>
           {TABS.map(t=>{
             const isActive = tab===t.id;
@@ -1892,9 +1762,7 @@ function App() {
   );
 }
 
-function Canvas() {
-  return <App/>;
-}
+function Canvas() { return <App/>; }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<Canvas/>);
 </script>
