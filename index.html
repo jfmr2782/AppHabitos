@@ -990,40 +990,9 @@ function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, on
         </div>
 
         {/* Active categories */}
-        {activeGoals.map((g,i)=>{
-          const cat = categories.find(c=>c.id===g.catId);
-          return (
-            <div
-              key={g.id}
-              ref={el=>rowRefs.current[i]=el}
-              style={{
-                opacity: dragIdx===i ? 0.4 : 1,
-                transform: overIdx===i&&dragIdx!==null&&dragIdx!==i ? 'translateY(-4px)' : 'none',
-                transition: 'opacity 0.2s, transform 0.15s',
-                display:'flex', alignItems:'center', gap:8,
-              }}
-            >
-              <div
-                onTouchStart={e=>handleTouchStart(e,i)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                style={{ padding:'8px 4px', cursor:'grab', touchAction:'none', flexShrink:0 }}
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <circle cx="4" cy="3" r="1.5" fill="rgba(255,255,255,0.25)"/>
-                  <circle cx="10" cy="3" r="1.5" fill="rgba(255,255,255,0.25)"/>
-                  <circle cx="4" cy="7" r="1.5" fill="rgba(255,255,255,0.25)"/>
-                  <circle cx="10" cy="7" r="1.5" fill="rgba(255,255,255,0.25)"/>
-                  <circle cx="4" cy="11" r="1.5" fill="rgba(255,255,255,0.25)"/>
-                  <circle cx="10" cy="11" r="1.5" fill="rgba(255,255,255,0.25)"/>
-                </svg>
-              </div>
-              <div style={{ flex:1 }} onClick={()=>onSelectCat(cat)}>
-                <CategoryCard cat={cat||{id:'',emoji:'🎯',name:'Sin categoría',color:'#888'}} goals={activeGoals} onPress={()=>onSelectCat(cat)} index={i}/>
-              </div>
-            </div>
-          );
-        })}
+        {categories.map((cat,i)=>(
+          <CategoryCard key={cat.id} cat={cat} goals={activeGoals} onPress={()=>onSelectCat(cat)} index={i}/>
+        ))}
 
         <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)',paddingTop:16,marginTop:4 }}>
           <button onClick={()=>setAddModal(true)} style={{ width:'100%',height:44,background:'transparent',border:'none',color:'rgba(255,255,255,0.38)',fontSize:13,fontWeight:400,cursor:'pointer',display:'flex',alignItems:'center',gap:10 }}>
@@ -1898,7 +1867,7 @@ function App() {
         )}
 
         {/* Tab bar — 4 tabs */}
-        <div style={{ position:'absolute',bottom:0,left:0,right:0,display:'flex',alignItems:'flex-start',paddingTop:14,paddingBottom:'env(safe-area-inset-bottom, 0px)',background:'rgba(12,12,18,0.94)',backdropFilter:'blur(20px)',borderTop:'1px solid rgba(255,255,255,0.07)',zIndex:50,minHeight:76 }}>
+        <div style={{ position:'absolute',bottom:0,left:0,right:0,display:'flex',alignItems:'flex-start',paddingTop:14,paddingBottom:'env(safe-area-inset-bottom, 8px)',background:'rgba(12,12,18,0.94)',backdropFilter:'blur(20px)',borderTop:'1px solid rgba(255,255,255,0.07)',zIndex:50 }}>
           {TABS.map(t=>{
             const isActive = tab===t.id;
             const accentColor = t.id==='metas'?'#E8B87B':t.id==='stats'?'#7BE8B0':t.id==='ajustes'?'#E87BB0':'#7B8FE8';
