@@ -578,18 +578,63 @@ function HabitModal({ initial, onSave, onClose }) {
   );
 }
 
-function HabitsScreen({ habits, curProg, allProg, onToggle, onEdit, onDelete, onAdd }) {
-  const [modal, setModal] = useState(null);
+function HabitsScreen({ habits, curProg, allProg, onToggle, onEdit, onDelete, onAdd, onReorder }) {
+  const [modal, setModal]         = useState(null);
+  const [dragIdx, setDragIdx]     = useState(null);
+  const [overIdx, setOverIdx]     = useState(null);
+  const dragItem                  = useRef(null);
+  const listRef                   = useRef(null);
+  const rowRefs                   = useRef([]);
+
   const totalDone      = habits.reduce((s,h)=>s+(curProg[h.id]?.filter(Boolean).length||0),0);
   const totalGoal      = habits.reduce((s,h)=>s+h.goal,0);
   const completedCount = habits.filter(h=>(curProg[h.id]?.filter(Boolean).length||0)>=h.goal).length;
   const allDone        = habits.length>0&&completedCount===habits.length;
-  const today = new Date();
-  const days  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  const months= ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const today  = new Date();
+  const days   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+  const getIndexAtY = (y) => {
+    let found = habits.length - 1;
+    rowRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      if (y < rect.top + rect.height / 2) {
+        found = Math.min(found, i);
+      }
+    });
+    return found;
+  };
+
+  const handleTouchStart = (e, i) => {
+    dragItem.current = i;
+    setDragIdx(i);
+    setOverIdx(i);
+  };
+
+  const handleTouchMove = (e) => {
+    if (dragItem.current === null) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const idx = getIndexAtY(touch.clientY);
+    setOverIdx(idx);
+  };
+
+  const handleTouchEnd = () => {
+    if (dragItem.current !== null && overIdx !== null && overIdx !== dragItem.current) {
+      const newOrder = [...habits];
+      const [moved] = newOrder.splice(dragItem.current, 1);
+      newOrder.splice(overIdx, 0, moved);
+      onReorder(newOrder);
+    }
+    dragItem.current = null;
+    setDragIdx(null);
+    setOverIdx(null);
+  };
+
   return (
-    <div style={{ height:'100%',overflow:'auto',paddingTop:'env(safe-area-inset-top, 62px)',position:'relative' }}>
-      <div style={{ padding:'0 24px 100px',animation:'tabSlide 0.25s ease' }}>
+    <div style={{ height:'100%',overflow:'auto',paddingTop:'calc(env(safe-area-inset-top, 0px) + 62px)',position:'relative' }}>
+      <div style={{ padding:'0 24px 100px',animation:'tabSlide 0.25s ease' }} ref={listRef}>
         <div style={{ marginBottom:28 }}>
           <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>{days[today.getDay()]} · {today.getDate()} {months[today.getMonth()]}</div>
           <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,lineHeight:1.1 }}>{allDone?'¡Todo listo! ✦':'Mis hábitos'}</div>
@@ -602,9 +647,38 @@ function HabitsScreen({ habits, curProg, allProg, onToggle, onEdit, onDelete, on
         </div>
 
         {habits.map((h,i)=>(
-          <HabitRow key={h.id} habit={h}
-            progress={Array.from({length:h.goal},(_,j)=>curProg[h.id]?.[j]||false)}
-            onToggle={onToggle} onEdit={h=>setModal(h)} onDelete={onDelete} index={i}/>
+          <div
+            key={h.id}
+            ref={el=>rowRefs.current[i]=el}
+            style={{
+              opacity: dragIdx===i ? 0.4 : 1,
+              transform: overIdx===i&&dragIdx!==null&&dragIdx!==i ? 'translateY(-4px)' : 'none',
+              transition: 'opacity 0.2s, transform 0.15s',
+              display:'flex', alignItems:'center', gap:8,
+            }}
+          >
+            {/* Handle drag */}
+            <div
+              onTouchStart={e=>handleTouchStart(e,i)}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              style={{ padding:'8px 4px', cursor:'grab', touchAction:'none', flexShrink:0 }}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="4" cy="3" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                <circle cx="10" cy="3" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                <circle cx="4" cy="7" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                <circle cx="10" cy="7" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                <circle cx="4" cy="11" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                <circle cx="10" cy="11" r="1.5" fill="rgba(255,255,255,0.25)"/>
+              </svg>
+            </div>
+            <div style={{ flex:1 }}>
+              <HabitRow habit={h}
+                progress={Array.from({length:h.goal},(_,j)=>curProg[h.id]?.[j]||false)}
+                onToggle={onToggle} onEdit={h=>setModal(h)} onDelete={onDelete} index={i}/>
+            </div>
+          </div>
         ))}
 
         {habits.length===0&&<div style={{ paddingTop:48,textAlign:'center',color:'rgba(255,255,255,0.2)',animation:'rowIn 0.4s ease' }}><div style={{ fontSize:32,marginBottom:12,opacity:0.4 }}>🌱</div><div style={{ fontSize:14,fontWeight:300 }}>Sin hábitos todavía</div></div>}
@@ -805,7 +879,7 @@ function CategoryDetail({ cat, goals, onBack, onAdd, onEdit, onDelete, onUpdate 
   const bc  = barColor(pct);
 
   return (
-    <div style={{ height:'100%',overflow:'auto',paddingTop:'env(safe-area-inset-top, 62px)',position:'relative' }}>
+    <div style={{ height:'100%',overflow:'auto',paddingTop:'calc(env(safe-area-inset-top, 0px) + 62px)',position:'relative' }}>
       <div style={{ padding:'0 24px 100px',animation:'slideInRight 0.28s ease' }}>
         {/* Back + Header */}
         <button onClick={onBack} style={{ display:'flex',alignItems:'center',gap:6,background:'none',border:'none',color:'rgba(255,255,255,0.45)',fontSize:13,fontWeight:400,cursor:'pointer',marginBottom:16,padding:0 }}>
@@ -850,9 +924,11 @@ function CategoryDetail({ cat, goals, onBack, onAdd, onEdit, onDelete, onUpdate 
 }
 
 // Main Metas screen (categories list)
-function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, onDeleteGoal, onUpdateGoal }) {
-  const [addModal, setAddModal] = useState(false);
+function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, onDeleteGoal, onUpdateGoal, onReorder }) {
+  const [addModal, setAddModal]       = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
+  const dragItem  = useRef(null);
+  const rowRefs   = useRef([]);
 
   const activeGoals    = goals.filter(g=>!g.completedAt);
   const completedGoals = goals.filter(g=>g.completedAt).sort((a,b)=>b.completedAt-a.completedAt);
@@ -862,6 +938,36 @@ function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, on
   const pct      = totalTar>0?Math.min(totalCur/totalTar,1):0;
   const bc       = barColor(pct);
 
+  const [dragIdx, setDragIdx] = useState(null);
+  const [overIdx, setOverIdx] = useState(null);
+
+  const getIndexAtY = (y) => {
+    let found = activeGoals.length - 1;
+    rowRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      if (y < rect.top + rect.height / 2) found = Math.min(found, i);
+    });
+    return found;
+  };
+
+  const handleTouchStart = (e, i) => { dragItem.current = i; setDragIdx(i); setOverIdx(i); };
+  const handleTouchMove  = (e) => {
+    if (dragItem.current === null) return;
+    e.preventDefault();
+    setOverIdx(getIndexAtY(e.touches[0].clientY));
+  };
+  const handleTouchEnd = () => {
+    if (dragItem.current !== null && overIdx !== null && overIdx !== dragItem.current) {
+      // reorder only within activeGoals, keep completed at end
+      const newActive = [...activeGoals];
+      const [moved] = newActive.splice(dragItem.current, 1);
+      newActive.splice(overIdx, 0, moved);
+      onReorder([...newActive, ...completedGoals]);
+    }
+    dragItem.current = null; setDragIdx(null); setOverIdx(null);
+  };
+
   const fmtDate = (ts) => {
     if (!ts) return '';
     const d = new Date(ts);
@@ -870,7 +976,7 @@ function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, on
   };
 
   return (
-    <div style={{ height:'100%',overflow:'auto',paddingTop:'env(safe-area-inset-top, 62px)',position:'relative' }}>
+    <div style={{ height:'100%',overflow:'auto',paddingTop:'calc(env(safe-area-inset-top, 0px) + 62px)',position:'relative' }}>
       <div style={{ padding:'0 24px 100px',animation:'tabSlide 0.25s ease' }}>
         <div style={{ marginBottom:28 }}>
           <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>Progreso total</div>
@@ -884,9 +990,40 @@ function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, on
         </div>
 
         {/* Active categories */}
-        {categories.map((cat,i)=>(
-          <CategoryCard key={cat.id} cat={cat} goals={activeGoals} onPress={()=>onSelectCat(cat)} index={i}/>
-        ))}
+        {activeGoals.map((g,i)=>{
+          const cat = categories.find(c=>c.id===g.catId);
+          return (
+            <div
+              key={g.id}
+              ref={el=>rowRefs.current[i]=el}
+              style={{
+                opacity: dragIdx===i ? 0.4 : 1,
+                transform: overIdx===i&&dragIdx!==null&&dragIdx!==i ? 'translateY(-4px)' : 'none',
+                transition: 'opacity 0.2s, transform 0.15s',
+                display:'flex', alignItems:'center', gap:8,
+              }}
+            >
+              <div
+                onTouchStart={e=>handleTouchStart(e,i)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                style={{ padding:'8px 4px', cursor:'grab', touchAction:'none', flexShrink:0 }}
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="4" cy="3" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                  <circle cx="10" cy="3" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                  <circle cx="4" cy="7" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                  <circle cx="10" cy="7" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                  <circle cx="4" cy="11" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                  <circle cx="10" cy="11" r="1.5" fill="rgba(255,255,255,0.25)"/>
+                </svg>
+              </div>
+              <div style={{ flex:1 }} onClick={()=>onSelectCat(cat)}>
+                <CategoryCard cat={cat||{id:'',emoji:'🎯',name:'Sin categoría',color:'#888'}} goals={activeGoals} onPress={()=>onSelectCat(cat)} index={i}/>
+              </div>
+            </div>
+          );
+        })}
 
         <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)',paddingTop:16,marginTop:4 }}>
           <button onClick={()=>setAddModal(true)} style={{ width:'100%',height:44,background:'transparent',border:'none',color:'rgba(255,255,255,0.38)',fontSize:13,fontWeight:400,cursor:'pointer',display:'flex',alignItems:'center',gap:10 }}>
@@ -1602,11 +1739,13 @@ function App() {
   const handleAddHabit    = d=>setHabits(p=>[...p,{id:Date.now(),...d}]);
   const handleEditHabit   = (h,d)=>setHabits(p=>p.map(x=>x.id===h.id?{...x,...d}:x));
   const handleDeleteHabit = id=>{ setHabits(p=>p.filter(h=>h.id!==id)); setAllProg(prev=>{ const n={}; for(const k in prev){const wp={...prev[k]};delete wp[id];n[k]=wp;} return n; }); };
+  const handleReorderHabits = newOrder => setHabits(newOrder);
 
   const handleAddGoal    = d=>setGoals(p=>[...p,{id:Date.now(),createdAt:Date.now(),...d}]);
   const handleEditGoal   = g=>setGoals(p=>p.map(x=>x.id===g.id?g:x));
   const handleDeleteGoal = id=>setGoals(p=>p.filter(g=>g.id!==id));
   const handleUpdateGoal = (id,newVal)=>setGoals(p=>p.map(g=>{ if(g.id!==id) return g; const newCur=Math.min(newVal,g.target); const justCompleted=newCur>=g.target&&!g.completedAt; return {...g,current:newCur,...(justCompleted?{completedAt:Date.now()}:{})}; }));
+  const handleReorderGoals = newOrder => setGoals(newOrder);
 
   const TABS = [
     { id:'habits',  label:'Hábitos' },
@@ -1654,7 +1793,7 @@ function App() {
 
         {tab==='habits'&&(
           <HabitsScreen habits={habits} curProg={curProg} allProg={allProg}
-            onToggle={handleToggle} onEdit={handleEditHabit} onDelete={handleDeleteHabit} onAdd={handleAddHabit}/>
+            onToggle={handleToggle} onEdit={handleEditHabit} onDelete={handleDeleteHabit} onAdd={handleAddHabit} onReorder={handleReorderHabits}/>
         )}
 
         {tab==='metas'&&!selectedCat&&(
@@ -1663,7 +1802,8 @@ function App() {
             onAddGoal={handleAddGoal}
             onEditGoal={handleEditGoal}
             onDeleteGoal={handleDeleteGoal}
-            onUpdateGoal={handleUpdateGoal}/>
+            onUpdateGoal={handleUpdateGoal}
+            onReorder={handleReorderGoals}/>
         )}
 
         {tab==='metas'&&selectedCat&&(
@@ -1676,7 +1816,7 @@ function App() {
         )}
 
         {tab==='stats'&&(
-          <div style={{ flex:1,overflow:'auto',paddingTop:'env(safe-area-inset-top, 62px)' }}>
+          <div style={{ flex:1,overflow:'auto',paddingTop:'calc(env(safe-area-inset-top, 0px) + 62px)' }}>
             <div style={{ padding:'0 24px 18px' }}>
               <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>Resumen</div>
               <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,marginBottom:24 }}>Progreso</div>
@@ -1686,7 +1826,7 @@ function App() {
         )}
 
         {tab==='ajustes'&&(
-          <div style={{ flex:1,overflow:'auto',paddingTop:'env(safe-area-inset-top, 62px)' }}>
+          <div style={{ flex:1,overflow:'auto',paddingTop:'calc(env(safe-area-inset-top, 0px) + 62px)' }}>
             <div style={{ padding:'0 24px 18px' }}>
               <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>Datos</div>
               <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,marginBottom:28 }}>Ajustes</div>
@@ -1758,7 +1898,7 @@ function App() {
         )}
 
         {/* Tab bar — 4 tabs */}
-        <div style={{ position:'absolute',bottom:0,left:0,right:0,height:76,display:'flex',alignItems:'flex-start',paddingTop:14,background:'rgba(12,12,18,0.94)',backdropFilter:'blur(20px)',borderTop:'1px solid rgba(255,255,255,0.07)',zIndex:50 }}>
+        <div style={{ position:'absolute',bottom:0,left:0,right:0,display:'flex',alignItems:'flex-start',paddingTop:14,paddingBottom:'env(safe-area-inset-bottom, 0px)',background:'rgba(12,12,18,0.94)',backdropFilter:'blur(20px)',borderTop:'1px solid rgba(255,255,255,0.07)',zIndex:50,minHeight:76 }}>
           {TABS.map(t=>{
             const isActive = tab===t.id;
             const accentColor = t.id==='metas'?'#E8B87B':t.id==='stats'?'#7BE8B0':t.id==='ajustes'?'#E87BB0':'#7B8FE8';
