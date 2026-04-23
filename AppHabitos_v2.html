@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>AppHábitos</title>
+
+<!-- PWA / pantalla completa iPhone -->
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Hábitos"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#0c0c12"/>
+
+<!-- Ícono para pantalla de inicio -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230c0c12'/%3E%3Ccircle cx='90' cy='75' r='32' fill='none' stroke='%237B8FE8' stroke-width='4'/%3E%3Ccircle cx='90' cy='75' r='18' fill='%237B8FE8' opacity='0.8'/%3E%3Crect x='54' y='128' width='18' height='18' rx='9' fill='%237B8FE8'/%3E%3Crect x='81' y='128' width='18' height='18' rx='9' fill='%237B8FE8'/%3E%3Crect x='108' y='128' width='18' height='18' rx='9' fill='rgba(255,255,255,0.2)'/%3E%3C/svg%3E"/>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<template id="__bundler_thumbnail" data-bg-color="#0c0c12">
+  <svg viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="600" fill="#0c0c12"/>
+    <circle cx="200" cy="200" r="80" fill="none" stroke="rgba(123,143,232,0.2)" stroke-width="1"/>
+    <circle cx="200" cy="200" r="50" fill="rgba(123,143,232,0.1)" stroke="rgba(123,143,232,0.4)" stroke-width="1"/>
+    <circle cx="200" cy="200" r="22" fill="#7B8FE8" opacity="0.9"/>
+    <!-- Dots row -->
+    <circle cx="140" cy="340" r="10" fill="#7B8FE8" opacity="0.9"/>
+    <circle cx="168" cy="340" r="10" fill="#7B8FE8" opacity="0.9"/>
+    <circle cx="196" cy="340" r="10" fill="#7B8FE8" opacity="0.9"/>
+    <circle cx="224" cy="340" r="10" fill="rgba(255,255,255,0.15)"/>
+    <circle cx="252" cy="340" r="10" fill="rgba(255,255,255,0.15)"/>
+    <!-- Label -->
+    <rect x="130" y="380" width="140" height="3" rx="2" fill="rgba(255,255,255,0.15)"/>
+    <rect x="150" y="395" width="100" height="3" rx="2" fill="rgba(255,255,255,0.08)"/>
+  </svg>
+</template>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; background:#0a0a11; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; }
+::-webkit-scrollbar { display:none; }
+@keyframes dotIn { 0%{transform:scale(0.3);opacity:0} 60%{transform:scale(1.4)} 80%{transform:scale(0.92)} 100%{transform:scale(1);opacity:1} }
+@keyframes dotOut { 0%{transform:scale(1)} 40%{transform:scale(0.5)} 100%{transform:scale(1)} }
+@keyframes rowIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+@keyframes sheetUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes confirmIn { from{opacity:0;transform:scale(0.94)} to{opacity:1;transform:scale(1)} }
+@keyframes tabSlide { from{opacity:0;transform:translateX(8px)} to{opacity:1;transform:translateX(0)} }
+@keyframes slideInRight { from{opacity:0;transform:translateX(24px)} to{opacity:1;transform:translateX(0)} }
+@keyframes glowPulse { 0%,100%{opacity:0.4} 50%{opacity:0.9} }
+@keyframes barFill { from{width:0%} to{width:var(--w)} }
+@keyframes celebPop { 0%{transform:scale(0);opacity:0} 50%{transform:scale(1.2)} 100%{transform:scale(1);opacity:1} }
+@keyframes celebFade { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-40px) scale(0.8)} }
+@keyframes ringExpand { 0%{transform:scale(0.6);opacity:0.8} 100%{transform:scale(2.2);opacity:0} }
+@keyframes starFloat { 0%{opacity:1;transform:translate(0,0) scale(1)} 100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0)} }
+</style>
+</head>
+<body>
+<script type="text/babel">
+
+// iOS.jsx — Simplified iOS 26 (Liquid Glass) device frame
+// Based on the iOS 26 UI Kit + Figma status bar spec. No assets, no deps.
+// Exports: IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard
+
+// ─────────────────────────────────────────────────────────────
+// Status bar
+// ─────────────────────────────────────────────────────────────
+function IOSStatusBar({ dark = false, time = '9:41' }) {
+  const c = dark ? '#fff' : '#000';
+  return (
+    <div style={{
+      display: 'flex', gap: 154, alignItems: 'center', justifyContent: 'center',
+      padding: '21px 24px 19px', boxSizing: 'border-box',
+      position: 'relative', zIndex: 20, width: '100%',
+    }}>
+      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 1.5 }}>
+        <span style={{
+          fontFamily: '-apple-system, "SF Pro", system-ui', fontWeight: 590,
+          fontSize: 17, lineHeight: '22px', color: c,
+        }}>{time}</span>
+      </div>
+      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, paddingTop: 1, paddingRight: 1 }}>
+        <svg width="19" height="12" viewBox="0 0 19 12">
+          <rect x="0" y="7.5" width="3.2" height="4.5" rx="0.7" fill={c}/>
+          <rect x="4.8" y="5" width="3.2" height="7" rx="0.7" fill={c}/>
+          <rect x="9.6" y="2.5" width="3.2" height="9.5" rx="0.7" fill={c}/>
+          <rect x="14.4" y="0" width="3.2" height="12" rx="0.7" fill={c}/>
+        </svg>
+        <svg width="17" height="12" viewBox="0 0 17 12">
+          <path d="M8.5 3.2C10.8 3.2 12.9 4.1 14.4 5.6L15.5 4.5C13.7 2.7 11.2 1.5 8.5 1.5C5.8 1.5 3.3 2.7 1.5 4.5L2.6 5.6C4.1 4.1 6.2 3.2 8.5 3.2Z" fill={c}/>
+          <path d="M8.5 6.8C9.9 6.8 11.1 7.3 12 8.2L13.1 7.1C11.8 5.9 10.2 5.1 8.5 5.1C6.8 5.1 5.2 5.9 3.9 7.1L5 8.2C5.9 7.3 7.1 6.8 8.5 6.8Z" fill={c}/>
+          <circle cx="8.5" cy="10.5" r="1.5" fill={c}/>
+        </svg>
+        <svg width="27" height="13" viewBox="0 0 27 13">
+          <rect x="0.5" y="0.5" width="23" height="12" rx="3.5" stroke={c} strokeOpacity="0.35" fill="none"/>
+          <rect x="2" y="2" width="20" height="9" rx="2" fill={c}/>
+          <path d="M25 4.5V8.5C25.8 8.2 26.5 7.2 26.5 6.5C26.5 5.8 25.8 4.8 25 4.5Z" fill={c} fillOpacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Liquid glass pill — blur + tint + shine
+// ─────────────────────────────────────────────────────────────
+function IOSGlassPill({ children, dark = false, style = {} }) {
+  return (
+    <div style={{
+      height: 44, minWidth: 44, borderRadius: 9999,
+      position: 'relative', overflow: 'hidden',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: dark
+        ? '0 2px 6px rgba(0,0,0,0.35), 0 6px 16px rgba(0,0,0,0.2)'
+        : '0 1px 3px rgba(0,0,0,0.07), 0 3px 10px rgba(0,0,0,0.06)',
+      ...style,
+    }}>
+      {/* blur + tint */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 9999,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        background: dark ? 'rgba(120,120,128,0.28)' : 'rgba(255,255,255,0.5)',
+      }} />
+      {/* shine */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 9999,
+        boxShadow: dark
+          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15), inset -1px -1px 1px rgba(255,255,255,0.08)'
+          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
+        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+      }} />
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', padding: '0 4px' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Navigation bar — glass pills + large title
+// ─────────────────────────────────────────────────────────────
+function IOSNavBar({ title = 'Title', dark = false, trailingIcon = true }) {
+  const muted = dark ? 'rgba(255,255,255,0.6)' : '#404040';
+  const text = dark ? '#fff' : '#000';
+  const pillIcon = (content) => (
+    <IOSGlassPill dark={dark}>
+      <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {content}
+      </div>
+    </IOSGlassPill>
+  );
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', gap: 10,
+      paddingTop: 62, paddingBottom: 10, position: 'relative', zIndex: 5,
+    }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 16px',
+      }}>
+        {/* back chevron */}
+        {pillIcon(
+          <svg width="12" height="20" viewBox="0 0 12 20" fill="none" style={{ marginLeft: -1 }}>
+            <path d="M10 2L2 10l8 8" stroke={muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+        {/* trailing ellipsis */}
+        {trailingIcon && pillIcon(
+          <svg width="22" height="6" viewBox="0 0 22 6">
+            <circle cx="3" cy="3" r="2.5" fill={muted}/>
+            <circle cx="11" cy="3" r="2.5" fill={muted}/>
+            <circle cx="19" cy="3" r="2.5" fill={muted}/>
+          </svg>
+        )}
+      </div>
+      {/* large title */}
+      <div style={{
+        padding: '0 16px',
+        fontFamily: '-apple-system, system-ui',
+        fontSize: 34, fontWeight: 700, lineHeight: '41px',
+        color: text, letterSpacing: 0.4,
+      }}>{title}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Grouped list (inset card, r:26) + row (52px)
+// ─────────────────────────────────────────────────────────────
+function IOSListRow({ title, detail, icon, chevron = true, isLast = false, dark = false }) {
+  const text = dark ? '#fff' : '#000';
+  const sec = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
+  const ter = dark ? 'rgba(235,235,245,0.3)' : 'rgba(60,60,67,0.3)';
+  const sep = dark ? 'rgba(84,84,88,0.65)' : 'rgba(60,60,67,0.12)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', minHeight: 52,
+      padding: '0 16px', position: 'relative',
+      fontFamily: '-apple-system, system-ui', fontSize: 17,
+      letterSpacing: -0.43,
+    }}>
+      {icon && (
+        <div style={{
+          width: 30, height: 30, borderRadius: 7, background: icon,
+          marginRight: 12, flexShrink: 0,
+        }} />
+      )}
+      <div style={{ flex: 1, color: text }}>{title}</div>
+      {detail && <span style={{ color: sec, marginRight: 6 }}>{detail}</span>}
+      {chevron && (
+        <svg width="8" height="14" viewBox="0 0 8 14" style={{ flexShrink: 0 }}>
+          <path d="M1 1l6 6-6 6" stroke={ter} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )}
+      {!isLast && (
+        <div style={{
+          position: 'absolute', bottom: 0, right: 0,
+          left: icon ? 58 : 16, height: 0.5, background: sep,
+        }} />
+      )}
+    </div>
+  );
+}
+
+function IOSList({ header, children, dark = false }) {
+  const hc = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
+  const bg = dark ? '#1C1C1E' : '#fff';
+  return (
+    <div>
+      {header && (
+        <div style={{
+          fontFamily: '-apple-system, system-ui', fontSize: 13,
+          color: hc, textTransform: 'uppercase',
+          padding: '8px 36px 6px', letterSpacing: -0.08,
+        }}>{header}</div>
+      )}
+      <div style={{
+        background: bg, borderRadius: 26,
+        margin: '0 16px', overflow: 'hidden',
+      }}>{children}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Device frame
+// ─────────────────────────────────────────────────────────────
+function IOSDevice({
+  children, width = 402, height = 874, dark = false,
+  title, keyboard = false,
+}) {
+  return (
+    <div style={{
+      width, height, borderRadius: 48, overflow: 'hidden',
+      position: 'relative', background: dark ? '#000' : '#F2F2F7',
+      boxShadow: '0 40px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.12)',
+      fontFamily: '-apple-system, system-ui, sans-serif',
+      WebkitFontSmoothing: 'antialiased',
+    }}>
+      {/* dynamic island */}
+      <div style={{
+        position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
+        width: 126, height: 37, borderRadius: 24, background: '#000', zIndex: 50,
+      }} />
+      {/* status bar (absolute) */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+        <IOSStatusBar dark={dark} />
+      </div>
+      {/* nav + content */}
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {title !== undefined && <IOSNavBar title={title} dark={dark} />}
+        <div style={{ flex: 1, overflow: 'auto' }}>{children}</div>
+        {keyboard && <IOSKeyboard dark={dark} />}
+      </div>
+      {/* home indicator — always on top */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 60,
+        height: 34, display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
+        paddingBottom: 8, pointerEvents: 'none',
+      }}>
+        <div style={{
+          width: 139, height: 5, borderRadius: 100,
+          background: dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.25)',
+        }} />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Keyboard — iOS 26 liquid glass
+// ─────────────────────────────────────────────────────────────
+function IOSKeyboard({ dark = false }) {
+  const glyph = dark ? 'rgba(255,255,255,0.7)' : '#595959';
+  const sugg = dark ? 'rgba(255,255,255,0.6)' : '#333';
+  const keyBg = dark ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.85)';
+
+  // special-key icons
+  const icons = {
+    shift: <svg width="19" height="17" viewBox="0 0 19 17"><path d="M9.5 1L1 9.5h4.5V16h8V9.5H18L9.5 1z" fill={glyph}/></svg>,
+    del: <svg width="23" height="17" viewBox="0 0 23 17"><path d="M7 1h13a2 2 0 012 2v11a2 2 0 01-2 2H7l-6-7.5L7 1z" fill="none" stroke={glyph} strokeWidth="1.6" strokeLinejoin="round"/><path d="M10 5l7 7M17 5l-7 7" stroke={glyph} strokeWidth="1.6" strokeLinecap="round"/></svg>,
+    ret: <svg width="20" height="14" viewBox="0 0 20 14"><path d="M18 1v6H4m0 0l4-4M4 7l4 4" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  };
+
+  const key = (content, { w, flex, ret, fs = 25, k } = {}) => (
+    <div key={k} style={{
+      height: 42, borderRadius: 8.5,
+      flex: flex ? 1 : undefined, width: w, minWidth: 0,
+      background: ret ? '#08f' : keyBg,
+      boxShadow: '0 1px 0 rgba(0,0,0,0.075)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: '-apple-system, "SF Compact", system-ui',
+      fontSize: fs, fontWeight: 458, color: ret ? '#fff' : glyph,
+    }}>{content}</div>
+  );
+
+  const row = (keys, pad = 0) => (
+    <div style={{ display: 'flex', gap: 6.5, justifyContent: 'center', padding: `0 ${pad}px` }}>
+      {keys.map(l => key(l, { flex: true, k: l }))}
+    </div>
+  );
+
+  return (
+    <div style={{
+      position: 'relative', zIndex: 15, borderRadius: 27, overflow: 'hidden',
+      padding: '11px 0 2px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      boxShadow: dark
+        ? '0 -2px 20px rgba(0,0,0,0.09)'
+        : '0 -1px 6px rgba(0,0,0,0.018), 0 -3px 20px rgba(0,0,0,0.012)',
+    }}>
+      {/* liquid glass bg — same recipe as nav pills */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 27,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        background: dark ? 'rgba(120,120,128,0.14)' : 'rgba(255,255,255,0.25)',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 27,
+        boxShadow: dark
+          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15)'
+          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
+        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* autocorrect bar */}
+      <div style={{
+        display: 'flex', gap: 20, alignItems: 'center',
+        padding: '8px 22px 13px', width: '100%', boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        {['"The"', 'the', 'to'].map((w, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && <div style={{ width: 1, height: 25, background: '#ccc', opacity: 0.3 }} />}
+            <div style={{
+              flex: 1, textAlign: 'center',
+              fontFamily: '-apple-system, system-ui', fontSize: 17,
+              color: sugg, letterSpacing: -0.43, lineHeight: '22px',
+            }}>{w}</div>
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* key layout */}
+      <div style={{
+        display: 'flex', flexDirection: 'column', gap: 13,
+        padding: '0 6.5px', width: '100%', boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        {row(['q','w','e','r','t','y','u','i','o','p'])}
+        {row(['a','s','d','f','g','h','j','k','l'], 20)}
+        <div style={{ display: 'flex', gap: 14.25, alignItems: 'center' }}>
+          {key(icons.shift, { w: 45, k: 'shift' })}
+          <div style={{ display: 'flex', gap: 6.5, flex: 1 }}>
+            {['z','x','c','v','b','n','m'].map(l => key(l, { flex: true, k: l }))}
+          </div>
+          {key(icons.del, { w: 45, k: 'del' })}
+        </div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {key('ABC', { w: 92.25, fs: 18, k: 'abc' })}
+          {key('', { flex: true, k: 'space' })}
+          {key(icons.ret, { w: 92.25, ret: true, k: 'ret' })}
+        </div>
+      </div>
+
+      {/* bottom spacer (emoji+mic area, icons omitted) */}
+      <div style={{ height: 56, width: '100%', position: 'relative' }} />
+    </div>
+  );
+}
+
+Object.assign(window, {
+  IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard,
+});
+
+</script>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ─── Default data ─────────────────────────────────────────────
+const DEFAULT_HABITS = [
+  { id:1, emoji:'📚', name:'Leer',       goal:5, color:'#7B8FE8' },
+  { id:2, emoji:'🏃', name:'Correr',     goal:4, color:'#E87B8F' },
+  { id:3, emoji:'💧', name:'Hidratarse', goal:7, color:'#7BC3E8' },
+  { id:4, emoji:'🧘', name:'Meditar',    goal:5, color:'#B07BE8' },
+  { id:5, emoji:'✍️', name:'Escribir',   goal:3, color:'#E8B87B' },
+];
+
+const DEFAULT_CATEGORIES = [
+  { id:'libros',    emoji:'📚', name:'Libros',    color:'#7B8FE8' },
+  { id:'fitness',   emoji:'🏋️', name:'Fitness',   color:'#E87B8F' },
+  { id:'cursos',    emoji:'🎓', name:'Cursos',    color:'#7BC3E8' },
+  { id:'proyectos', emoji:'🚀', name:'Proyectos', color:'#E8B87B' },
+];
+
+const DEFAULT_GOALS = [
+  { id:101, catId:'libros',    name:'Atomic Habits', current:120, target:300, unit:'páginas',  createdAt: Date.now()-30*86400000 },
+  { id:102, catId:'libros',    name:'Sapiens',       current:80,  target:500, unit:'páginas',  createdAt: Date.now()-20*86400000 },
+  { id:103, catId:'libros',    name:'Deep Work',     current:0,   target:300, unit:'páginas',  createdAt: Date.now()-5*86400000 },
+  { id:201, catId:'fitness',   name:'Press banca',   current:65,  target:80,  unit:'kg',       createdAt: Date.now()-60*86400000 },
+  { id:202, catId:'fitness',   name:'Sentadilla',    current:90,  target:120, unit:'kg',       createdAt: Date.now()-60*86400000 },
+  { id:203, catId:'fitness',   name:'Peso muerto',   current:100, target:140, unit:'kg',       createdAt: Date.now()-60*86400000 },
+  { id:301, catId:'cursos',    name:'UX Design',     current:6,   target:20,  unit:'módulos',  createdAt: Date.now()-14*86400000 },
+  { id:302, catId:'cursos',    name:'React Avanzado',current:12,  target:30,  unit:'lecciones',createdAt: Date.now()-14*86400000 },
+  { id:401, catId:'proyectos', name:'App móvil',     current:3,   target:10,  unit:'pantallas',createdAt: Date.now()-10*86400000 },
+  { id:402, catId:'proyectos', name:'Portfolio',     current:30,  target:100, unit:'%',        createdAt: Date.now()-10*86400000 },
+];
+
+const HABIT_EMOJIS  = ['📚','🏃','💧','🧘','✍️','🎨','🎸','🌿','💪','🧠','🍎','😴','🚴','📝','🎯','🌅','☕','🎵'];
+const HABIT_COLORS  = ['#7B8FE8','#E87B8F','#7BC3E8','#B07BE8','#E8B87B','#7BE8B0','#E8A87B','#A87BE8'];
+const CAT_EMOJIS    = ['📚','🏋️','🎓','🚀','🎨','💡','🧬','🏆','🌍','🎯'];
+
+// ─── Helpers ──────────────────────────────────────────────────
+function getWeekKey(offset=0) {
+  const d = new Date();
+  d.setDate(d.getDate()-((d.getDay()+6)%7)+offset*7);
+  return `${d.getFullYear()}-${d.getMonth()}-wk${Math.ceil(d.getDate()/7)}`;
+}
+function loadState() { try{const r=localStorage.getItem('apphabitos_v5');return r?JSON.parse(r):null;}catch{return null;} }
+function saveState(s){ try{localStorage.setItem('apphabitos_v5',JSON.stringify(s));}catch{} }
+
+function pColor(done, goal) {
+  if (!done) return 'rgba(255,255,255,0.14)';
+  const r = done/goal;
+  if (r>=1)   return '#6EE7A0';
+  if (r>=0.5) return '#E8C97B';
+  return '#E88F7B';
+}
+function barColor(pct) {
+  if (pct>=1)   return { bar:'linear-gradient(90deg,#4ADE80,#22c55e)', text:'#6EE7A0' };
+  if (pct>=0.6) return { bar:'linear-gradient(90deg,#FCD34D,#F59E0B)', text:'#E8C97B' };
+  if (pct>=0.3) return { bar:'linear-gradient(90deg,#F87171,#EF4444)', text:'#E88F7B' };
+  return { bar:'rgba(255,255,255,0.18)', text:'rgba(255,255,255,0.35)' };
+}
+
+// ─── Shared Confirm Dialog ────────────────────────────────────
+function ConfirmDialog({ title, body, onConfirm, onCancel }) {
+  return (
+    <div onClick={onCancel} style={{ position:'absolute',inset:0,zIndex:200,background:'rgba(0,0,0,0.7)',backdropFilter:'blur(8px)',display:'flex',alignItems:'center',justifyContent:'center',padding:28,animation:'fadeIn 0.18s ease' }}>
+      <div onClick={e=>e.stopPropagation()} style={{ background:'#111116',borderRadius:22,border:'1px solid rgba(255,255,255,0.09)',padding:'26px 22px 20px',width:'100%',animation:'confirmIn 0.22s ease',boxShadow:'0 20px 60px rgba(0,0,0,0.6)' }}>
+        <div style={{ fontSize:17,fontWeight:600,color:'#fff',marginBottom:8,letterSpacing:-0.3 }}>{title}</div>
+        <div style={{ fontSize:13,color:'rgba(255,255,255,0.45)',marginBottom:22,lineHeight:1.55 }}>{body}</div>
+        <div style={{ display:'flex',gap:10 }}>
+          <button onClick={onCancel}  style={{ flex:1,height:44,borderRadius:13,background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.09)',color:'rgba(255,255,255,0.6)',fontSize:14,fontWeight:500,cursor:'pointer' }}>Cancelar</button>
+          <button onClick={onConfirm} style={{ flex:1,height:44,borderRadius:13,background:'rgba(232,143,123,0.12)',border:'1px solid rgba(232,143,123,0.3)',color:'#E88F7B',fontSize:14,fontWeight:600,cursor:'pointer' }}>Eliminar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// HÁBITOS
+// ══════════════════════════════════════════════════════════════
+function Dot({ active, color, canActivate, onClick }) {
+  const ref = useRef(null);
+  const handle = () => {
+    if (!active && !canActivate) return;
+    if (ref.current) { ref.current.style.animation='none'; void ref.current.offsetWidth; ref.current.style.animation = active?'dotOut 0.25s cubic-bezier(0.4,0,0.2,1) forwards':'dotIn 0.38s cubic-bezier(0.34,1.56,0.64,1) forwards'; }
+    onClick();
+  };
+  return (
+    <div ref={ref} onClick={handle} style={{ width:20,height:20,borderRadius:'50%',flexShrink:0,cursor:(!active&&!canActivate)?'default':'pointer',background:active?color:'transparent',border:active?`1.5px solid ${color}`:'1.5px solid rgba(255,255,255,0.22)',boxShadow:active?`0 0 8px ${color}66`:'none',transition:'background 0.2s,border-color 0.2s,box-shadow 0.2s',opacity:(!active&&!canActivate)?0.3:1 }}/>
+  );
+}
+
+function HabitRow({ habit, progress, onToggle, onEdit, onDelete, index }) {
+  const [showActions, setShowActions] = useState(false);
+  const [confirmDel,  setConfirmDel]  = useState(false);
+  const [celeb,       setCeleb]       = useState(false);
+  const done = progress.filter(Boolean).length;
+  const isComplete = done >= habit.goal;
+  const prevDone = useRef(done);
+  const { color } = habit;
+
+  useEffect(()=>{
+    if(done>=habit.goal && prevDone.current<habit.goal) setCeleb(true);
+    prevDone.current = done;
+  },[done]);
+
+  if (confirmDel) return <ConfirmDialog title="Eliminar hábito" body={<>¿Eliminar <strong style={{color:'rgba(255,255,255,0.7)'}}>{habit.emoji} {habit.name}</strong>? Se borrará su historial.</>} onConfirm={()=>{onDelete(habit.id);setConfirmDel(false);}} onCancel={()=>setConfirmDel(false)}/>;
+
+  return (
+    <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)',padding:'15px 0 16px',animation:`rowIn 0.45s ease ${index*0.065}s both`,position:'relative' }}>
+      <div style={{ display:'flex',alignItems:'center',marginBottom:11 }}>
+        <span style={{ fontSize:17,marginRight:11,lineHeight:1,opacity:isComplete?1:0.65 }}>{habit.emoji}</span>
+        <span style={{ flex:1,fontSize:15,letterSpacing:-0.2,fontWeight:isComplete?500:300,color:isComplete?'#fff':'rgba(255,255,255,0.82)',transition:'color 0.3s,font-weight 0.3s' }}>{habit.name}</span>
+        {isComplete && <span style={{ fontSize:10,fontWeight:700,color,marginRight:10,letterSpacing:1,textTransform:'uppercase',animation:'glowPulse 2s ease infinite' }}>✓</span>}
+        <span style={{ fontSize:12,color:pColor(done,habit.goal),fontWeight:600,marginRight:10,transition:'color 0.3s',letterSpacing:-0.1 }}>
+          {done}<span style={{ color:'rgba(255,255,255,0.2)',fontWeight:300 }}>/{habit.goal}</span>
+        </span>
+        <button onClick={()=>setShowActions(s=>!s)} style={{ width:26,height:26,borderRadius:8,background:showActions?'rgba(255,255,255,0.08)':'transparent',border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
+          <svg width="13" height="13" viewBox="0 0 13 13"><circle cx="6.5" cy="2" r="1.3" fill="rgba(255,255,255,0.4)"/><circle cx="6.5" cy="6.5" r="1.3" fill="rgba(255,255,255,0.4)"/><circle cx="6.5" cy="11" r="1.3" fill="rgba(255,255,255,0.4)"/></svg>
+        </button>
+      </div>
+
+      {showActions && (
+        <div style={{ display:'flex',gap:8,marginBottom:11,animation:'fadeIn 0.15s ease' }}>
+          <button onClick={()=>{onEdit(habit);setShowActions(false);}} style={{ flex:1,height:32,borderRadius:10,background:'transparent',border:`1px solid ${color}44`,color,fontSize:12,fontWeight:600,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:5 }}>
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M7.5 1L10 3.5L4 9.5H1.5V7L7.5 1Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/></svg>Editar
+          </button>
+          <button onClick={()=>{setConfirmDel(true);setShowActions(false);}} style={{ flex:1,height:32,borderRadius:10,background:'transparent',border:'1px solid rgba(232,143,123,0.3)',color:'#E88F7B',fontSize:12,fontWeight:600,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:5 }}>
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 3H9.5M4 3V2C4 1.7 4.2 1.5 4.5 1.5H6.5C6.8 1.5 7 1.7 7 2V3M3.5 3L4 9.5H7L7.5 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>Eliminar
+          </button>
+        </div>
+      )}
+
+      <div style={{ display:'flex',gap:7,marginBottom:11 }}>
+        {Array.from({length:habit.goal}).map((_,i)=>(
+          <Dot key={i} active={!!progress[i]} color={color} canActivate={!progress[i]&&done<habit.goal}
+            onClick={()=>{ if(progress[i]) onToggle(habit.id,i,false); else if(done<habit.goal) onToggle(habit.id,i,true); }}/>
+        ))}
+      </div>
+      <div style={{ height:1,background:'rgba(255,255,255,0.09)',borderRadius:99,overflow:'hidden' }}>
+        <div style={{ height:'100%',borderRadius:99,width:`${Math.min(done/habit.goal,1)*100}%`,background:isComplete?`linear-gradient(90deg,${color},#6EE7A0)`:color,transition:'width 0.5s cubic-bezier(0.34,1.1,0.64,1)',opacity:0.7 }}/>
+      </div>
+      {celeb&&<CelebrationOverlay message={`${habit.emoji} ¡Completado!`} color={color} onDone={()=>setCeleb(false)}/>}
+    </div>
+  );
+}
+
+function HabitModal({ initial, onSave, onClose }) {
+  const isEdit = !!initial;
+  const [name,  setName]  = useState(initial?.name  || '');
+  const [emoji, setEmoji] = useState(initial?.emoji || '🎯');
+  const [goal,  setGoal]  = useState(initial?.goal  || 5);
+  const [color, setColor] = useState(initial?.color || '#7B8FE8');
+  return (
+    <div onClick={onClose} style={{ position:'absolute',inset:0,background:'rgba(0,0,0,0.7)',backdropFilter:'blur(12px)',zIndex:150,display:'flex',alignItems:'flex-end',animation:'fadeIn 0.18s ease' }}>
+      <div onClick={e=>e.stopPropagation()} style={{ width:'100%',background:'#0e0e14',borderRadius:'24px 24px 0 0',border:'1px solid rgba(255,255,255,0.07)',padding:'18px 22px 44px',animation:'sheetUp 0.3s cubic-bezier(0.34,1.1,0.64,1)',boxShadow:'0 -20px 60px rgba(0,0,0,0.5)' }}>
+        <div style={{ width:32,height:3,background:'rgba(255,255,255,0.1)',borderRadius:99,margin:'0 auto 18px' }}/>
+        <div style={{ fontSize:16,fontWeight:600,color:'rgba(255,255,255,0.85)',marginBottom:18,letterSpacing:-0.3 }}>{isEdit?'Editar hábito':'Nuevo hábito'}</div>
+        <input placeholder="Nombre" value={name} onChange={e=>setName(e.target.value)} style={{ width:'100%',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.09)',borderRadius:13,padding:'12px 15px',color:'#fff',fontSize:15,fontWeight:300,outline:'none',marginBottom:16,fontFamily:'Inter',letterSpacing:-0.1 }} autoFocus/>
+        <div style={{ fontSize:10,fontWeight:600,color:'rgba(255,255,255,0.3)',marginBottom:8,letterSpacing:1.5,textTransform:'uppercase' }}>Icono</div>
+        <div style={{ display:'flex',flexWrap:'wrap',gap:7,marginBottom:16 }}>
+          {HABIT_EMOJIS.map(e=><button key={e} onClick={()=>setEmoji(e)} style={{ width:38,height:38,borderRadius:11,fontSize:18,background:emoji===e?`${color}22`:'rgba(255,255,255,0.04)',border:emoji===e?`1px solid ${color}66`:'1px solid transparent',cursor:'pointer' }}>{e}</button>)}
+        </div>
+        <div style={{ fontSize:10,fontWeight:600,color:'rgba(255,255,255,0.3)',marginBottom:8,letterSpacing:1.5,textTransform:'uppercase' }}>Color</div>
+        <div style={{ display:'flex',gap:9,marginBottom:16 }}>
+          {HABIT_COLORS.map(c=><button key={c} onClick={()=>setColor(c)} style={{ width:26,height:26,borderRadius:'50%',background:c,border:color===c?'2px solid #fff':'2px solid transparent',cursor:'pointer',outline:'none',boxShadow:color===c?`0 0 0 3px ${c}55`:'none',flexShrink:0 }}/>)}
+        </div>
+        <div style={{ fontSize:10,fontWeight:600,color:'rgba(255,255,255,0.3)',marginBottom:8,letterSpacing:1.5,textTransform:'uppercase' }}>Meta — {goal} días</div>
+        <div style={{ display:'flex',gap:6,marginBottom:22 }}>
+          {[1,2,3,4,5,6,7].map(n=><button key={n} onClick={()=>setGoal(n)} style={{ flex:1,height:38,borderRadius:11,fontSize:14,fontWeight:goal===n?700:300,background:goal===n?`${color}22`:'rgba(255,255,255,0.04)',color:goal===n?color:'rgba(255,255,255,0.35)',border:goal===n?`1px solid ${color}55`:'1px solid rgba(255,255,255,0.06)',cursor:'pointer' }}>{n}</button>)}
+        </div>
+        <button onClick={()=>{ if(name.trim()){onSave({name:name.trim(),emoji,goal,color});onClose();} }} style={{ width:'100%',height:50,borderRadius:15,fontSize:15,fontWeight:600,background:name.trim()?color:'rgba(255,255,255,0.05)',color:name.trim()?'#fff':'rgba(255,255,255,0.2)',border:'none',cursor:name.trim()?'pointer':'default',boxShadow:name.trim()?`0 4px 20px ${color}44`:'none',transition:'all 0.2s' }}>
+          {isEdit?'Guardar':'Añadir hábito'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function HabitsScreen({ habits, curProg, allProg, onToggle, onEdit, onDelete, onAdd }) {
+  const [modal, setModal] = useState(null);
+  const totalDone      = habits.reduce((s,h)=>s+(curProg[h.id]?.filter(Boolean).length||0),0);
+  const totalGoal      = habits.reduce((s,h)=>s+h.goal,0);
+  const completedCount = habits.filter(h=>(curProg[h.id]?.filter(Boolean).length||0)>=h.goal).length;
+  const allDone        = habits.length>0&&completedCount===habits.length;
+  const today = new Date();
+  const days  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const months= ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return (
+    <div style={{ height:'100%',overflow:'auto',paddingTop:62,position:'relative' }}>
+      <div style={{ padding:'0 24px 100px',animation:'tabSlide 0.25s ease' }}>
+        <div style={{ marginBottom:28 }}>
+          <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>{days[today.getDay()]} · {today.getDate()} {months[today.getMonth()]}</div>
+          <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,lineHeight:1.1 }}>{allDone?'¡Todo listo! ✦':'Mis hábitos'}</div>
+          <div style={{ marginTop:16,display:'flex',alignItems:'center',gap:12 }}>
+            <div style={{ flex:1,height:1,background:'rgba(255,255,255,0.1)',position:'relative',overflow:'hidden' }}>
+              <div style={{ position:'absolute',left:0,top:0,height:'100%',width:`${totalGoal>0?(totalDone/totalGoal)*100:0}%`,background:allDone?'#7BE8B0':'rgba(255,255,255,0.5)',transition:'width 0.6s ease,background 0.4s' }}/>
+            </div>
+            <span style={{ fontSize:11,color:pColor(totalDone,totalGoal),fontWeight:600,flexShrink:0,letterSpacing:0.2 }}>{completedCount}/{habits.length}</span>
+          </div>
+        </div>
+
+        {habits.map((h,i)=>(
+          <HabitRow key={h.id} habit={h}
+            progress={Array.from({length:h.goal},(_,j)=>curProg[h.id]?.[j]||false)}
+            onToggle={onToggle} onEdit={h=>setModal(h)} onDelete={onDelete} index={i}/>
+        ))}
+
+        {habits.length===0&&<div style={{ paddingTop:48,textAlign:'center',color:'rgba(255,255,255,0.2)',animation:'rowIn 0.4s ease' }}><div style={{ fontSize:32,marginBottom:12,opacity:0.4 }}>🌱</div><div style={{ fontSize:14,fontWeight:300 }}>Sin hábitos todavía</div></div>}
+
+        <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)',paddingTop:16,marginTop:habits.length>0?4:0 }}>
+          <button onClick={()=>setModal('add')} style={{ width:'100%',height:44,background:'transparent',border:'none',color:'rgba(255,255,255,0.38)',fontSize:13,fontWeight:400,cursor:'pointer',display:'flex',alignItems:'center',gap:10 }}>
+            <span style={{ width:20,height:20,borderRadius:'50%',border:'1px solid rgba(255,255,255,0.22)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:200,flexShrink:0 }}>+</span>
+            Nuevo hábito
+          </button>
+        </div>
+      </div>
+
+      {modal==='add'&&<HabitModal onSave={data=>{onAdd(data);setModal(null);}} onClose={()=>setModal(null)}/>}
+      {modal&&modal!=='add'&&<HabitModal initial={modal} onSave={data=>{onEdit(modal,data);setModal(null);}} onClose={()=>setModal(null)}/>}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// METAS
+// ══════════════════════════════════════════════════════════════
+function ProgressBar({ current, target, color, animated=false }) {
+  const pct = target>0?Math.min(current/target,1):0;
+  const bc  = barColor(pct);
+  return (
+    <div style={{ height:5,background:'rgba(255,255,255,0.08)',borderRadius:99,overflow:'hidden' }}>
+      <div style={{ height:'100%',borderRadius:99,width:`${pct*100}%`,background:bc.bar,transition:'width 0.6s cubic-bezier(0.34,1.1,0.64,1)' }}/>
+    </div>
+  );
+}
+
+// Category card on the main Metas screen
+function CategoryCard({ cat, goals, onPress, index }) {
+  const catGoals = goals.filter(g=>g.catId===cat.id);
+  const totalCur = catGoals.reduce((s,g)=>s+g.current,0);
+  const totalTar = catGoals.reduce((s,g)=>s+g.target,0);
+  const pct      = totalTar>0?Math.min(totalCur/totalTar,1):0;
+  const bc       = barColor(pct);
+  const completed= catGoals.filter(g=>g.current>=g.target).length;
+
+  return (
+    <div onClick={onPress} style={{ borderTop:'1px solid rgba(255,255,255,0.08)',padding:'16px 0',animation:`rowIn 0.4s ease ${index*0.07}s both`,cursor:'pointer' }}>
+      <div style={{ display:'flex',alignItems:'center',marginBottom:10 }}>
+        <span style={{ fontSize:20,marginRight:12,lineHeight:1 }}>{cat.emoji}</span>
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:15,fontWeight:400,color:'rgba(255,255,255,0.85)',letterSpacing:-0.2 }}>{cat.name}</div>
+          <div style={{ fontSize:11,color:'rgba(255,255,255,0.35)',marginTop:2 }}>{completed}/{catGoals.length} completadas</div>
+        </div>
+        <div style={{ textAlign:'right',marginRight:12 }}>
+          <span style={{ fontSize:13,fontWeight:600,color:bc.text }}>{Math.round(pct*100)}%</span>
+        </div>
+        <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+      <ProgressBar current={totalCur} target={totalTar}/>
+    </div>
+  );
+}
+
+// Quick-add progress sheet
+function QuickAddSheet({ goal, onAdd, onClose }) {
+  const [val, setVal] = useState('');
+  const step = goal.unit==='kg'?2.5:goal.unit==='%'?5:1;
+  const remaining = Math.max(goal.target-goal.current,0);
+  return (
+    <div onClick={onClose} style={{ position:'absolute',inset:0,background:'rgba(0,0,0,0.65)',backdropFilter:'blur(10px)',zIndex:150,display:'flex',alignItems:'flex-end',animation:'fadeIn 0.18s ease' }}>
+      <div onClick={e=>e.stopPropagation()} style={{ width:'100%',background:'#0e0e14',borderRadius:'24px 24px 0 0',border:'1px solid rgba(255,255,255,0.07)',padding:'18px 22px 44px',animation:'sheetUp 0.28s cubic-bezier(0.34,1.1,0.64,1)' }}>
+        <div style={{ width:32,height:3,background:'rgba(255,255,255,0.1)',borderRadius:99,margin:'0 auto 16px' }}/>
+        <div style={{ fontSize:14,fontWeight:300,color:'rgba(255,255,255,0.5)',marginBottom:4 }}>Sumar progreso a</div>
+        <div style={{ fontSize:17,fontWeight:600,color:'#fff',marginBottom:20,letterSpacing:-0.3 }}>{goal.name}</div>
+
+        {/* Quick chips */}
+        <div style={{ display:'flex',gap:8,marginBottom:18,flexWrap:'wrap' }}>
+          {[step, step*2, step*5, remaining].filter((v,i,a)=>v>0&&a.indexOf(v)===i).map(n=>(
+            <button key={n} onClick={()=>{ onAdd(n); onClose(); }} style={{ height:36,borderRadius:10,padding:'0 14px',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',color:'rgba(255,255,255,0.7)',fontSize:13,fontWeight:500,cursor:'pointer' }}>
+              +{n} {goal.unit}
+            </button>
+          ))}
+        </div>
+
+        {/* Manual input */}
+        <div style={{ display:'flex',gap:10 }}>
+          <input type="number" placeholder={`Cantidad (${goal.unit})`} value={val} onChange={e=>setVal(e.target.value)}
+            style={{ flex:1,background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.09)',borderRadius:13,padding:'12px 15px',color:'#fff',fontSize:15,fontWeight:300,outline:'none',fontFamily:'Inter' }}/>
+          <button onClick={()=>{ const n=parseFloat(val); if(n>0){onAdd(n);onClose();} }} style={{ height:48,borderRadius:13,padding:'0 18px',background:'rgba(123,143,232,0.2)',border:'1px solid rgba(123,143,232,0.35)',color:'#7B8FE8',fontSize:14,fontWeight:600,cursor:'pointer',flexShrink:0 }}>
+            Añadir
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Goal edit modal
+function GoalModal({ initial, catId, categories, onSave, onClose }) {
+  const isEdit = !!initial;
+  const [name,    setName]    = useState(initial?.name    || '');
+  const [current, setCurrent] = useState(String(initial?.current ?? 0));
+  const [target,  setTarget]  = useState(String(initial?.target  || 10));
+  const [unit,    setUnit]    = useState(initial?.unit    || 'unidades');
+  const [selCat,  setSelCat]  = useState(initial?.catId   || catId || categories[0]?.id);
+  const UNITS = ['páginas','kg','km','módulos','lecciones','pantallas','%','horas','días','unidades'];
+  return (
+    <div onClick={onClose} style={{ position:'absolute',inset:0,background:'rgba(0,0,0,0.7)',backdropFilter:'blur(12px)',zIndex:150,display:'flex',alignItems:'flex-end',animation:'fadeIn 0.18s ease' }}>
+      <div onClick={e=>e.stopPropagation()} style={{ width:'100%',background:'#0e0e14',borderRadius:'24px 24px 0 0',border:'1px solid rgba(255,255,255,0.07)',padding:'18px 22px 44px',animation:'sheetUp 0.3s cubic-bezier(0.34,1.1,0.64,1)' }}>
+        <div style={{ width:32,height:3,background:'rgba(255,255,255,0.1)',borderRadius:99,margin:'0 auto 16px' }}/>
+        <div style={{ fontSize:16,fontWeight:600,color:'rgba(255,255,255,0.85)',marginBottom:16,letterSpacing:-0.3 }}>{isEdit?'Editar meta':'Nueva meta'}</div>
+
+        <input placeholder="Nombre de la meta" value={name} onChange={e=>setName(e.target.value)} style={{ width:'100%',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.09)',borderRadius:13,padding:'12px 15px',color:'#fff',fontSize:15,fontWeight:300,outline:'none',marginBottom:14,fontFamily:'Inter' }} autoFocus/>
+
+        {/* Category selector */}
+        <div style={{ fontSize:10,fontWeight:600,color:'rgba(255,255,255,0.3)',marginBottom:8,letterSpacing:1.5,textTransform:'uppercase' }}>Categoría</div>
+        <div style={{ display:'flex',gap:8,marginBottom:14,flexWrap:'wrap' }}>
+          {categories.map(c=>(
+            <button key={c.id} onClick={()=>setSelCat(c.id)} style={{ height:34,borderRadius:10,padding:'0 12px',fontSize:13,fontWeight:500,background:selCat===c.id?`${c.color}22`:'rgba(255,255,255,0.04)',border:selCat===c.id?`1px solid ${c.color}55`:'1px solid rgba(255,255,255,0.06)',color:selCat===c.id?c.color:'rgba(255,255,255,0.45)',cursor:'pointer' }}>
+              {c.emoji} {c.name}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:14 }}>
+          <div>
+            <div style={{ fontSize:10,fontWeight:600,color:'rgba(255,255,255,0.3)',marginBottom:6,letterSpacing:1.5,textTransform:'uppercase' }}>Actual</div>
+            <input type="number" value={current} onChange={e=>setCurrent(e.target.value)} style={{ width:'100%',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.09)',borderRadius:13,padding:'11px 14px',color:'#fff',fontSize:15,outline:'none',fontFamily:'Inter' }}/>
+          </div>
+          <div>
+            <div style={{ fontSize:10,fontWeight:600,color:'rgba(255,255,255,0.3)',marginBottom:6,letterSpacing:1.5,textTransform:'uppercase' }}>Objetivo</div>
+            <input type="number" value={target} onChange={e=>setTarget(e.target.value)} style={{ width:'100%',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.09)',borderRadius:13,padding:'11px 14px',color:'#fff',fontSize:15,outline:'none',fontFamily:'Inter' }}/>
+          </div>
+        </div>
+
+        <div style={{ fontSize:10,fontWeight:600,color:'rgba(255,255,255,0.3)',marginBottom:8,letterSpacing:1.5,textTransform:'uppercase' }}>Unidad</div>
+        <div style={{ display:'flex',gap:7,flexWrap:'wrap',marginBottom:22 }}>
+          {UNITS.map(u=><button key={u} onClick={()=>setUnit(u)} style={{ height:32,borderRadius:9,padding:'0 11px',fontSize:12,fontWeight:500,background:unit===u?'rgba(123,143,232,0.2)':'rgba(255,255,255,0.04)',border:unit===u?'1px solid rgba(123,143,232,0.4)':'1px solid rgba(255,255,255,0.06)',color:unit===u?'#7B8FE8':'rgba(255,255,255,0.4)',cursor:'pointer' }}>{u}</button>)}
+        </div>
+
+        <button onClick={()=>{ if(name.trim()){ onSave({name:name.trim(),catId:selCat,current:parseFloat(current)||0,target:parseFloat(target)||10,unit});onClose(); } }} style={{ width:'100%',height:50,borderRadius:15,fontSize:15,fontWeight:600,background:name.trim()?'#7B8FE8':'rgba(255,255,255,0.05)',color:name.trim()?'#fff':'rgba(255,255,255,0.2)',border:'none',cursor:name.trim()?'pointer':'default',boxShadow:name.trim()?'0 4px 20px rgba(123,143,232,0.4)':'none',transition:'all 0.2s' }}>
+          {isEdit?'Guardar':'Crear meta'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Single goal row inside category detail
+function GoalRow({ goal, onQuickAdd, onEdit, onDelete, index }) {
+  const [showActions, setShowActions] = useState(false);
+  const [confirmDel,  setConfirmDel]  = useState(false);
+  const pct = goal.target>0?Math.min(goal.current/goal.target,1):0;
+  const bc  = barColor(pct);
+  const isComplete = goal.current>=goal.target;
+
+  if (confirmDel) return <ConfirmDialog title="Eliminar meta" body={<>¿Eliminar <strong style={{color:'rgba(255,255,255,0.7)'}}>{goal.name}</strong>?</>} onConfirm={()=>{onDelete(goal.id);setConfirmDel(false);}} onCancel={()=>setConfirmDel(false)}/>;
+
+  return (
+    <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)',padding:'14px 0',animation:`rowIn 0.4s ease ${index*0.06}s both` }}>
+      <div style={{ display:'flex',alignItems:'flex-start',marginBottom:10 }}>
+        <div style={{ flex:1 }}>
+          <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:3 }}>
+            <span style={{ fontSize:14,fontWeight:isComplete?500:300,color:isComplete?'#fff':'rgba(255,255,255,0.78)',letterSpacing:-0.2 }}>{goal.name}</span>
+            {isComplete&&<span style={{ fontSize:10,fontWeight:700,color:'#6EE7A0',letterSpacing:0.5,animation:'glowPulse 2s ease infinite' }}>✓</span>}
+          </div>
+          <div style={{ fontSize:12,color:bc.text,fontWeight:500 }}>
+            {goal.current} <span style={{ color:'rgba(255,255,255,0.3)',fontWeight:300 }}>/ {goal.target} {goal.unit}</span>
+          </div>
+          {goal.createdAt&&<div style={{ fontSize:10,color:'rgba(255,255,255,0.22)',marginTop:2 }}>{(()=>{const d=new Date(goal.createdAt);const m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return `Iniciada ${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`;})()}</div>}
+        </div>
+
+        <div style={{ display:'flex',gap:6,alignItems:'center',flexShrink:0 }}>
+          {/* Quick-add button */}
+          <button onClick={()=>onQuickAdd(goal)} style={{ height:30,borderRadius:9,padding:'0 12px',background:'rgba(123,143,232,0.12)',border:'1px solid rgba(123,143,232,0.25)',color:'#7B8FE8',fontSize:12,fontWeight:600,cursor:'pointer' }}>+ sumar</button>
+          {/* Menu */}
+          <button onClick={()=>setShowActions(s=>!s)} style={{ width:26,height:26,borderRadius:8,background:showActions?'rgba(255,255,255,0.08)':'transparent',border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center' }}>
+            <svg width="13" height="13" viewBox="0 0 13 13"><circle cx="6.5" cy="2" r="1.3" fill="rgba(255,255,255,0.4)"/><circle cx="6.5" cy="6.5" r="1.3" fill="rgba(255,255,255,0.4)"/><circle cx="6.5" cy="11" r="1.3" fill="rgba(255,255,255,0.4)"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <ProgressBar current={goal.current} target={goal.target}/>
+
+      {showActions&&(
+        <div style={{ display:'flex',gap:8,marginTop:10,animation:'fadeIn 0.15s ease' }}>
+          <button onClick={()=>{onEdit(goal);setShowActions(false);}} style={{ flex:1,height:30,borderRadius:9,background:'transparent',border:'1px solid rgba(123,143,232,0.3)',color:'#7B8FE8',fontSize:12,fontWeight:500,cursor:'pointer' }}>Editar</button>
+          <button onClick={()=>{setConfirmDel(true);setShowActions(false);}} style={{ flex:1,height:30,borderRadius:9,background:'transparent',border:'1px solid rgba(232,143,123,0.3)',color:'#E88F7B',fontSize:12,fontWeight:500,cursor:'pointer' }}>Eliminar</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Category detail view
+function CategoryDetail({ cat, goals, onBack, onAdd, onEdit, onDelete, onUpdate }) {
+  const [quickAdd, setQuickAdd] = useState(null);
+  const [editGoal, setEditGoal] = useState(null);
+  const catGoals = goals.filter(g=>g.catId===cat.id);
+  const totalCur = catGoals.reduce((s,g)=>s+g.current,0);
+  const totalTar = catGoals.reduce((s,g)=>s+g.target,0);
+  const pct = totalTar>0?Math.min(totalCur/totalTar,1):0;
+  const bc  = barColor(pct);
+
+  return (
+    <div style={{ height:'100%',overflow:'auto',paddingTop:62,position:'relative' }}>
+      <div style={{ padding:'0 24px 100px',animation:'slideInRight 0.28s ease' }}>
+        {/* Back + Header */}
+        <button onClick={onBack} style={{ display:'flex',alignItems:'center',gap:6,background:'none',border:'none',color:'rgba(255,255,255,0.45)',fontSize:13,fontWeight:400,cursor:'pointer',marginBottom:16,padding:0 }}>
+          <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          Metas
+        </button>
+
+        <div style={{ display:'flex',alignItems:'center',gap:10,marginBottom:6 }}>
+          <span style={{ fontSize:26,lineHeight:1 }}>{cat.emoji}</span>
+          <div style={{ fontSize:26,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6 }}>{cat.name}</div>
+        </div>
+
+        <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:28 }}>
+          <div style={{ flex:1,height:1,background:'rgba(255,255,255,0.1)',position:'relative',overflow:'hidden' }}>
+            <div style={{ position:'absolute',left:0,top:0,height:'100%',width:`${pct*100}%`,background:bc.bar,transition:'width 0.6s ease' }}/>
+          </div>
+          <span style={{ fontSize:11,color:bc.text,fontWeight:600,flexShrink:0 }}>{Math.round(pct*100)}%</span>
+        </div>
+
+        {/* Goal rows */}
+        {catGoals.map((g,i)=>(
+          <GoalRow key={g.id} goal={g} index={i}
+            onQuickAdd={setQuickAdd}
+            onEdit={setEditGoal}
+            onDelete={onDelete}/>
+        ))}
+
+        {catGoals.length===0&&<div style={{ paddingTop:32,textAlign:'center',color:'rgba(255,255,255,0.2)' }}><div style={{ fontSize:28,marginBottom:10,opacity:0.4 }}>🎯</div><div style={{ fontSize:14,fontWeight:300 }}>Sin metas en esta categoría</div></div>}
+
+        <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)',paddingTop:16,marginTop:catGoals.length>0?4:0 }}>
+          <button onClick={()=>onAdd(cat.id)} style={{ width:'100%',height:44,background:'transparent',border:'none',color:'rgba(255,255,255,0.38)',fontSize:13,fontWeight:400,cursor:'pointer',display:'flex',alignItems:'center',gap:10 }}>
+            <span style={{ width:20,height:20,borderRadius:'50%',border:'1px solid rgba(255,255,255,0.22)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:200,flexShrink:0 }}>+</span>
+            Nueva meta
+          </button>
+        </div>
+      </div>
+
+      {quickAdd&&<QuickAddSheet goal={quickAdd} onAdd={amt=>onUpdate(quickAdd.id,Math.min(quickAdd.current+amt,quickAdd.target))} onClose={()=>setQuickAdd(null)}/>}
+      {editGoal&&<GoalModal initial={editGoal} categories={[cat]} onSave={data=>{ onEdit({...editGoal,...data}); setEditGoal(null); }} onClose={()=>setEditGoal(null)}/>}
+    </div>
+  );
+}
+
+// Main Metas screen (categories list)
+function MetasScreen({ categories, goals, onSelectCat, onAddGoal, onEditGoal, onDeleteGoal, onUpdateGoal }) {
+  const [addModal, setAddModal] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
+
+  const activeGoals    = goals.filter(g=>!g.completedAt);
+  const completedGoals = goals.filter(g=>g.completedAt).sort((a,b)=>b.completedAt-a.completedAt);
+
+  const totalCur = activeGoals.reduce((s,g)=>s+g.current,0);
+  const totalTar = activeGoals.reduce((s,g)=>s+g.target,0);
+  const pct      = totalTar>0?Math.min(totalCur/totalTar,1):0;
+  const bc       = barColor(pct);
+
+  const fmtDate = (ts) => {
+    if (!ts) return '';
+    const d = new Date(ts);
+    const months=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  };
+
+  return (
+    <div style={{ height:'100%',overflow:'auto',paddingTop:62,position:'relative' }}>
+      <div style={{ padding:'0 24px 100px',animation:'tabSlide 0.25s ease' }}>
+        <div style={{ marginBottom:28 }}>
+          <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>Progreso total</div>
+          <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,marginBottom:16 }}>Metas</div>
+          <div style={{ display:'flex',alignItems:'center',gap:12 }}>
+            <div style={{ flex:1,height:1,background:'rgba(255,255,255,0.1)',position:'relative',overflow:'hidden' }}>
+              <div style={{ position:'absolute',left:0,top:0,height:'100%',width:`${pct*100}%`,background:bc.bar,transition:'width 0.6s ease' }}/>
+            </div>
+            <span style={{ fontSize:11,color:bc.text,fontWeight:600,flexShrink:0 }}>{Math.round(pct*100)}%</span>
+          </div>
+        </div>
+
+        {/* Active categories */}
+        {categories.map((cat,i)=>(
+          <CategoryCard key={cat.id} cat={cat} goals={activeGoals} onPress={()=>onSelectCat(cat)} index={i}/>
+        ))}
+
+        <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)',paddingTop:16,marginTop:4 }}>
+          <button onClick={()=>setAddModal(true)} style={{ width:'100%',height:44,background:'transparent',border:'none',color:'rgba(255,255,255,0.38)',fontSize:13,fontWeight:400,cursor:'pointer',display:'flex',alignItems:'center',gap:10 }}>
+            <span style={{ width:20,height:20,borderRadius:'50%',border:'1px solid rgba(255,255,255,0.22)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:200,flexShrink:0 }}>+</span>
+            Nueva meta
+          </button>
+        </div>
+
+        {/* Completed goals section */}
+        {completedGoals.length>0&&(
+          <div style={{ marginTop:20 }}>
+            <button onClick={()=>setShowCompleted(s=>!s)} style={{ display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',background:'none',border:'none',cursor:'pointer',padding:'0 0 14px',borderTop:'1px solid rgba(255,255,255,0.08)',paddingTop:16 }}>
+              <div style={{ display:'flex',alignItems:'center',gap:8 }}>
+                <span style={{ fontSize:12,color:'#7BE8B0',fontWeight:600 }}>✓</span>
+                <span style={{ fontSize:13,fontWeight:400,color:'rgba(255,255,255,0.55)' }}>Completadas ({completedGoals.length})</span>
+              </div>
+              <svg width="10" height="6" viewBox="0 0 10 6" style={{ transform:showCompleted?'rotate(180deg)':'none',transition:'transform 0.2s' }}>
+                <path d="M1 1l4 4 4-4" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+              </svg>
+            </button>
+
+            {showCompleted&&(
+              <div style={{ animation:'rowIn 0.2s ease' }}>
+                {completedGoals.map((g,i)=>{
+                  const cat = categories.find(c=>c.id===g.catId);
+                  const daysToComplete = g.createdAt&&g.completedAt ? Math.round((g.completedAt-g.createdAt)/(1000*60*60*24)) : null;
+                  return (
+                    <div key={g.id} style={{ borderTop:'1px solid rgba(255,255,255,0.06)',padding:'13px 0',animation:`rowIn 0.3s ease ${i*0.05}s both` }}>
+                      <div style={{ display:'flex',alignItems:'flex-start',gap:10 }}>
+                        <span style={{ fontSize:16,lineHeight:1.4 }}>{cat?.emoji||'🎯'}</span>
+                        <div style={{ flex:1 }}>
+                          <div style={{ display:'flex',alignItems:'center',gap:6,marginBottom:4 }}>
+                            <span style={{ fontSize:14,fontWeight:500,color:'rgba(255,255,255,0.7)' }}>{g.name}</span>
+                            <span style={{ fontSize:10,color:'#7BE8B0',background:'rgba(123,232,176,0.1)',borderRadius:20,padding:'1px 7px',border:'1px solid rgba(123,232,176,0.2)' }}>✓</span>
+                          </div>
+                          <div style={{ display:'flex',gap:12 }}>
+                            <span style={{ fontSize:11,color:'rgba(255,255,255,0.3)' }}>{g.target} {g.unit}</span>
+                            {g.completedAt&&<span style={{ fontSize:11,color:'rgba(255,255,255,0.3)' }}>Completada {fmtDate(g.completedAt)}</span>}
+                            {daysToComplete!==null&&<span style={{ fontSize:11,color:'rgba(255,255,255,0.2)' }}>{daysToComplete}d</span>}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {addModal&&<GoalModal categories={categories} onSave={data=>{onAddGoal(data);setAddModal(false);}} onClose={()=>setAddModal(false)}/>}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// HISTORIAL CALENDAR
+// ══════════════════════════════════════════════════════════════
+function getWeekLabel(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() - ((d.getDay()+6)%7) + offset*7);
+  const months = ['En','Feb','Mar','Ab','May','Jun','Jul','Ag','Sep','Oct','Nov','Dic'];
+  return `${d.getDate()} ${months[d.getMonth()]}`;
+}
+
+function HabitCalendar({ habits, allProgress }) {
+  const [selectedWeek, setSelectedWeek] = useState(null);
+
+  // Build 52 weeks grouped by month
+  const NUM_WEEKS = 52;
+  const weeks = Array.from({length:NUM_WEEKS}, (_,i) => {
+    const offset = -(NUM_WEEKS-1) + i;
+    const wk = getWeekKey(offset);
+    const wp = allProgress[wk] || {};
+    const totalDone = habits.reduce((s,h)=>s+(wp[h.id]||[]).filter(Boolean).length,0);
+    const totalGoal = habits.reduce((s,h)=>s+h.goal,0);
+    const overallPct = totalGoal>0 ? Math.min(totalDone/totalGoal,1) : 0;
+    const d = new Date();
+    d.setDate(d.getDate()-((d.getDay()+6)%7)+offset*7);
+    return { offset, wk, overallPct, totalDone, totalGoal, date:new Date(d), year:d.getFullYear(), month:d.getMonth() };
+  });
+
+  // Group by year-month
+  const groups = [];
+  weeks.forEach(w => {
+    const key = `${w.year}-${w.month}`;
+    let g = groups.find(g=>g.key===key);
+    if (!g) { g={key,year:w.year,month:w.month,weeks:[]}; groups.push(g); }
+    g.weeks.push(w);
+  });
+
+  const selData = selectedWeek!=null ? weeks.find(w=>w.offset===selectedWeek) : null;
+
+  const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const MONTHS_SHORT = ['En','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  const dotBg = (pct) => {
+    if (pct<=0)    return 'rgba(255,255,255,0.07)';
+    if (pct>=1)    return '#7BE8B0';
+    if (pct>=0.65) return '#E8C97B';
+    if (pct>=0.35) return '#E88F7B';
+    return 'rgba(255,255,255,0.18)';
+  };
+  const dotGlow = (pct) => pct>=1 ? '0 0 8px rgba(123,232,176,0.55)' : 'none';
+
+  const today = new Date();
+  const isCurrentMonth = (g) => g.year===today.getFullYear() && g.month===today.getMonth();
+
+  return (
+    <div>
+      {/* Legend */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18 }}>
+        <div style={{ fontSize:10, fontWeight:600, color:'rgba(255,255,255,0.28)', letterSpacing:1.2, textTransform:'uppercase' }}>Últimas 52 semanas</div>
+        <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+          {[0,0.3,0.65,1].map((p,i)=><div key={i} style={{ width:10,height:10,borderRadius:3,background:dotBg(p) }}/>)}
+          <span style={{ fontSize:9, color:'rgba(255,255,255,0.2)', marginLeft:3 }}>0 → 100%</span>
+        </div>
+      </div>
+
+      {/* Month grid */}
+      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+        {groups.map((g,gi)=>(
+          <div key={g.key} style={{ display:'flex', alignItems:'center', gap:10 }}>
+            {/* Month label */}
+            <div style={{ width:28, flexShrink:0, textAlign:'right' }}>
+              <span style={{ fontSize:10, fontWeight:isCurrentMonth(g)?600:400, color:isCurrentMonth(g)?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.25)' }}>
+                {MONTHS_SHORT[g.month]}
+                {g.weeks[0].year!==today.getFullYear()&&gi===0&&<div style={{ fontSize:8, color:'rgba(255,255,255,0.2)' }}>{g.year}</div>}
+              </span>
+            </div>
+
+            {/* Week dots */}
+            <div style={{ display:'flex', gap:7, flexWrap:'nowrap' }}>
+              {/* Pad to align weeks within month */}
+              {Array.from({length:5}).map((_,di)=>{
+                const w = g.weeks[di];
+                if (!w) return <div key={di} style={{ width:30, height:30, flexShrink:0 }}/>;
+                const isSel = w.offset===selectedWeek;
+                const isNow = w.offset===0;
+                return (
+                  <div key={di} onClick={()=>setSelectedWeek(w.offset===selectedWeek?null:w.offset)} style={{
+                    width:30, height:30, borderRadius:8, flexShrink:0, cursor:'pointer',
+                    background: dotBg(w.overallPct),
+                    border: isSel?'2px solid rgba(255,255,255,0.5)':isNow?'1.5px solid rgba(255,255,255,0.25)':'2px solid transparent',
+                    boxShadow: isSel?`0 0 0 2px rgba(255,255,255,0.15), ${dotGlow(w.overallPct)}`:dotGlow(w.overallPct),
+                    transform: isSel?'scale(1.12)':'scale(1)',
+                    transition:'transform 0.15s, box-shadow 0.15s',
+                    position:'relative',
+                  }}>
+                    {isNow&&<div style={{ position:'absolute',bottom:3,left:'50%',transform:'translateX(-50%)',width:4,height:4,borderRadius:'50%',background:'rgba(255,255,255,0.7)' }}/>}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Month % */}
+            {(()=>{
+              const avg = g.weeks.reduce((s,w)=>s+w.overallPct,0)/g.weeks.length;
+              return avg>0 ? <span style={{ fontSize:10, color:dotBg(avg), fontWeight:600, flexShrink:0, width:28 }}>{Math.round(avg*100)}%</span> : <span style={{ width:28, flexShrink:0 }}/>;
+            })()}
+          </div>
+        ))}
+      </div>
+
+      {/* Selected week detail */}
+      {selData&&(
+        <div style={{ marginTop:16, padding:'16px', background:'rgba(255,255,255,0.04)', borderRadius:16, border:'1px solid rgba(255,255,255,0.08)', animation:'rowIn 0.22s ease' }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+            <div style={{ fontSize:13, fontWeight:500, color:'rgba(255,255,255,0.6)' }}>
+              {selData.offset===0?'Esta semana':selData.offset===-1?'Semana anterior':`${selData.date.getDate()} ${MONTHS_SHORT[selData.date.getMonth()]} ${selData.date.getFullYear()}`}
+            </div>
+            <span style={{ fontSize:18, fontWeight:700, color:dotBg(selData.overallPct) }}>{Math.round(selData.overallPct*100)}%</span>
+          </div>
+          <div style={{ height:5, background:'rgba(255,255,255,0.07)', borderRadius:99, overflow:'hidden', marginBottom:10 }}>
+            <div style={{ height:'100%', width:`${selData.overallPct*100}%`, background:selData.overallPct>=1?'linear-gradient(90deg,#34d399,#7BE8B0)':selData.overallPct>=0.65?'#E8C97B':'#E88F7B', borderRadius:99, transition:'width 0.4s ease' }}/>
+          </div>
+          <div style={{ fontSize:12, color:'rgba(255,255,255,0.3)', fontWeight:300 }}>{selData.totalDone} de {selData.totalGoal} días completados</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// CELEBRATION OVERLAY
+// ══════════════════════════════════════════════════════════════
+function CelebrationOverlay({ message, color, onDone }) {
+  const stars = Array.from({length:8},(_,i)=>({
+    angle: i*(360/8),
+    dist: 55 + Math.random()*20,
+  }));
+  useEffect(()=>{ const t=setTimeout(onDone,2000); return ()=>clearTimeout(t); },[]);
+  return (
+    <div style={{ position:'absolute',inset:0,zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none' }}>
+      {/* ring */}
+      <div style={{ position:'absolute',width:80,height:80,borderRadius:'50%',border:`2px solid ${color}`,animation:'ringExpand 0.6s ease forwards' }}/>
+      <div style={{ position:'absolute',width:80,height:80,borderRadius:'50%',border:`2px solid ${color}`,animation:'ringExpand 0.6s ease 0.15s forwards',opacity:0 }}/>
+      {/* stars */}
+      {stars.map((s,i)=>{
+        const rad = s.angle*Math.PI/180;
+        const tx = Math.cos(rad)*s.dist+'px';
+        const ty = Math.sin(rad)*s.dist+'px';
+        return (
+          <div key={i} style={{ position:'absolute',width:6,height:6,borderRadius:'50%',background:color,animation:`starFloat 0.7s ease ${i*0.04}s forwards`,'--tx':tx,'--ty':ty }}/>
+        );
+      })}
+      {/* center badge */}
+      <div style={{ background:color,borderRadius:99,padding:'8px 18px',animation:'celebPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards',boxShadow:`0 0 24px ${color}88` }}>
+        <span style={{ fontSize:14,fontWeight:700,color:'#fff',letterSpacing:0.2 }}>{message}</span>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════════════════════
+function StatLabel({ label }) {
+  return <div style={{ fontSize:10,fontWeight:600,color:'rgba(255,255,255,0.28)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:14 }}>{label}</div>;
+}
+
+function StatsScreen({ habits, goals, categories, allProgress }) {
+  const [activeSection, setActiveSection] = useState('habitos'); // 'habitos' | 'metas' | 'historial'
+
+  // ── Hábitos data ──
+  const weekKeys   = Array.from({length:7},(_,i)=>getWeekKey(i-6));
+  const weekLabels = ['S-6','S-5','S-4','S-3','S-2','S-1','Esta'];
+  const maxTotal   = habits.reduce((s,h)=>s+h.goal,0);
+  const weekTotals = weekKeys.map(wk=>{ const wp=allProgress[wk]||{}; return habits.reduce((s,h)=>s+(wp[h.id]?.filter(Boolean).length||0),0); });
+  const curWeek    = allProgress[getWeekKey()]||{};
+  const completedH = habits.filter(h=>(curWeek[h.id]?.filter(Boolean).length||0)>=h.goal).length;
+  const totalDone  = habits.reduce((s,h)=>s+(curWeek[h.id]?.filter(Boolean).length||0),0);
+  const streak     = (()=>{ let s=0; for(let i=6;i>=0;i--){ if(weekTotals[i]>0)s++; else break; } return s; })();
+  const bestWeek   = Math.max(...weekTotals,0);
+  const habPct     = maxTotal>0?Math.round(totalDone/maxTotal*100):0;
+
+  // ── Metas data ──
+  const totalGoalsCur = goals.reduce((s,g)=>s+g.current,0);
+  const totalGoalsTar = goals.reduce((s,g)=>s+g.target,0);
+  const completedGoals= goals.filter(g=>g.current>=g.target).length;
+  const overallPct    = totalGoalsTar>0?Math.round(totalGoalsCur/totalGoalsTar*100):0;
+
+  // segment toggle style
+  const seg = (id) => ({
+    flex:1, height:32, borderRadius:10, border:'none', cursor:'pointer', fontSize:12, fontWeight:600,
+    background: activeSection===id ? 'rgba(255,255,255,0.1)' : 'transparent',
+    color: activeSection===id ? '#fff' : 'rgba(255,255,255,0.35)',
+    transition:'all 0.2s',
+  });
+
+  return (
+    <div style={{ padding:'0 24px 100px', animation:'tabSlide 0.3s ease' }}>
+
+      {/* Segment control */}
+      <div style={{ display:'flex',background:'rgba(255,255,255,0.05)',borderRadius:13,padding:3,marginBottom:22,border:'1px solid rgba(255,255,255,0.07)' }}>
+        <button style={seg('habitos')}   onClick={()=>setActiveSection('habitos')}>Hábitos</button>
+        <button style={seg('metas')}     onClick={()=>setActiveSection('metas')}>Metas</button>
+        <button style={seg('historial')} onClick={()=>setActiveSection('historial')}>Historial</button>
+      </div>
+
+      {/* ── HÁBITOS SECTION ── */}
+      {activeSection==='habitos'&&(
+        <>
+          {/* KPI row */}
+          <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:20 }}>
+            {[
+              { val:`${completedH}/${habits.length}`, sub:'hábitos completados', color:'#7B8FE8' },
+              { val:`${streak}`, sub: streak===1?'semana de racha':'semanas de racha', color:'#E8B87B' },
+              { val:`${habPct}%`, sub:'progreso semanal', color:'#7BE8B0' },
+              { val:`${maxTotal>0?Math.round(bestWeek/maxTotal*100):0}%`, sub:'mejor semana', color:'#E87B8F' },
+            ].map((c,i)=>(
+              <div key={i} style={{ padding:'14px 16px',background:'rgba(255,255,255,0.04)',borderRadius:16,border:'1px solid rgba(255,255,255,0.07)',animation:`rowIn 0.4s ease ${i*0.06}s both` }}>
+                <div style={{ fontSize:24,fontWeight:700,color:c.color,letterSpacing:-1,lineHeight:1 }}>{c.val}</div>
+                <div style={{ fontSize:11,color:'rgba(255,255,255,0.35)',marginTop:5,fontWeight:400,lineHeight:1.3 }}>{c.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bar chart */}
+          <div style={{ marginBottom:22 }}>
+            <StatLabel label="Últimas 7 semanas"/>
+            <div style={{ display:'flex',gap:6,alignItems:'flex-end',height:80 }}>
+              {weekTotals.map((val,i)=>{
+                const p   = maxTotal>0?Math.min(val/maxTotal,1):0;
+                const isLast = i===6;
+                const col = p>=1?'#7BE8B0':p>=0.5?'#E8B87B':p>0?'#E88F7B':'rgba(255,255,255,0.05)';
+                return (
+                  <div key={i} style={{ flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4,height:'100%',justifyContent:'flex-end' }}>
+                    {val>0&&<span style={{ fontSize:9,color:col,fontWeight:700 }}>{val}</span>}
+                    <div style={{ width:'100%',background:'rgba(255,255,255,0.04)',borderRadius:4,overflow:'hidden',height:60,display:'flex',alignItems:'flex-end',border:isLast?`1px solid ${col}33`:'none' }}>
+                      <div style={{ width:'100%',height:`${p*100}%`,background:isLast?col:`${col}99`,transition:'height 0.7s cubic-bezier(0.34,1.1,0.64,1)',minHeight:p>0?2:0 }}/>
+                    </div>
+                    <span style={{ fontSize:9,color:isLast?'rgba(255,255,255,0.55)':'rgba(255,255,255,0.22)',fontWeight:isLast?600:400 }}>{weekLabels[i]}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Per-habit breakdown */}
+          {habits.length>0&&(
+            <div>
+              <StatLabel label="Detalle semanal"/>
+              {habits.map((h,i)=>{
+                const p   = curWeek[h.id]||[];
+                const done= p.filter(Boolean).length;
+                const pct = h.goal>0?done/h.goal:0;
+                return (
+                  <div key={h.id} style={{ borderTop:'1px solid rgba(255,255,255,0.07)',paddingTop:13,marginBottom:13 }}>
+                    <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:7 }}>
+                      <span style={{ fontSize:13,color:'rgba(255,255,255,0.75)',fontWeight:300 }}>{h.emoji} {h.name}</span>
+                      <div style={{ display:'flex',alignItems:'center',gap:6 }}>
+                        <span style={{ fontSize:12,color:pColor(done,h.goal),fontWeight:600 }}>{done}/{h.goal}</span>
+                        {pct>=1&&<span style={{ fontSize:10,color:h.color }}>✓</span>}
+                      </div>
+                    </div>
+                    <div style={{ height:3,background:'rgba(255,255,255,0.06)',borderRadius:99,overflow:'hidden' }}>
+                      <div style={{ height:'100%',width:`${pct*100}%`,background:pct>=1?`linear-gradient(90deg,${h.color},#7BE8B0)`:h.color,borderRadius:99,transition:'width 0.5s ease' }}/>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── METAS SECTION ── */}
+      {/* ── HISTORIAL SECTION ── */}
+      {activeSection==='historial'&&(
+        habits.length===0
+          ? <div style={{ textAlign:'center',paddingTop:40,color:'rgba(255,255,255,0.2)' }}><div style={{ fontSize:28,marginBottom:10,opacity:0.4 }}>📅</div><div style={{ fontSize:14,fontWeight:300 }}>Sin hábitos todavía</div></div>
+          : <HabitCalendar habits={habits} allProgress={allProgress}/>
+      )}
+
+      {activeSection==='metas'&&(
+        <>
+          {/* KPI row */}
+          <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:20 }}>
+            {[
+              { val:`${overallPct}%`, sub:'Progreso total', color:'#7B8FE8' },
+              { val:`${completedGoals}/${goals.length}`, sub:'Metas completadas', color:'#7BE8B0' },
+            ].map((c,i)=>(
+              <div key={i} style={{ padding:'14px 16px',background:'rgba(255,255,255,0.04)',borderRadius:16,border:'1px solid rgba(255,255,255,0.07)',animation:`rowIn 0.4s ease ${i*0.06}s both` }}>
+                <div style={{ fontSize:24,fontWeight:700,color:c.color,letterSpacing:-1,lineHeight:1 }}>{c.val}</div>
+                <div style={{ fontSize:11,color:'rgba(255,255,255,0.35)',marginTop:5,fontWeight:400 }}>{c.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Overall progress bar */}
+          <div style={{ marginBottom:22 }}>
+            <StatLabel label="Progreso global"/>
+            <div style={{ height:6,background:'rgba(255,255,255,0.07)',borderRadius:99,overflow:'hidden',marginBottom:6 }}>
+              <div style={{ height:'100%',width:`${overallPct}%`,background:barColor(overallPct/100).bar,borderRadius:99,transition:'width 0.6s ease' }}/>
+            </div>
+            <div style={{ fontSize:11,color:'rgba(255,255,255,0.3)',fontWeight:400 }}>{totalGoalsCur.toLocaleString()} de {totalGoalsTar.toLocaleString()} unidades</div>
+          </div>
+
+          {/* Per-goal detail */}
+          <StatLabel label="Detalle por meta"/>
+          {categories.map((cat)=>{
+            const catGoals = goals.filter(g=>g.catId===cat.id&&!g.completedAt);
+            if(!catGoals.length) return null;
+            const fmtDate = (ts)=>{ if(!ts) return null; const d=new Date(ts); const m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']; return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`; };
+            return (
+              <div key={cat.id} style={{ marginBottom:20 }}>
+                <div style={{ display:'flex',alignItems:'center',gap:7,marginBottom:10,paddingBottom:8,borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+                  <span style={{ fontSize:14 }}>{cat.emoji}</span>
+                  <span style={{ fontSize:12,fontWeight:600,color:'rgba(255,255,255,0.45)',letterSpacing:0.3 }}>{cat.name}</span>
+                </div>
+                {catGoals.map((g)=>{
+                  const pct = g.target>0?Math.min(g.current/g.target,1):0;
+                  const bc  = barColor(pct);
+                  return (
+                    <div key={g.id} style={{ marginBottom:14,paddingLeft:6 }}>
+                      <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6 }}>
+                        <span style={{ fontSize:13,fontWeight:400,color:'rgba(255,255,255,0.82)' }}>{g.name}</span>
+                        <span style={{ fontSize:13,fontWeight:700,color:bc.text }}>{Math.round(pct*100)}%</span>
+                      </div>
+                      <div style={{ height:5,background:'rgba(255,255,255,0.07)',borderRadius:99,overflow:'hidden',marginBottom:6 }}>
+                        <div style={{ height:'100%',width:`${pct*100}%`,background:bc.bar,borderRadius:99,transition:'width 0.5s ease' }}/>
+                      </div>
+                      <div style={{ display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:4 }}>
+                        <span style={{ fontSize:11,color:'rgba(255,255,255,0.4)',fontWeight:500 }}>{g.current} / {g.target} {g.unit}</span>
+                        {g.createdAt&&<span style={{ fontSize:10,color:'rgba(255,255,255,0.22)' }}>Iniciada {fmtDate(g.createdAt)}</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+
+          {/* Completed goals */}
+          {goals.filter(g=>g.completedAt).length>0&&(
+            <div style={{ marginTop:4 }}>
+              <StatLabel label="Completadas"/>
+              {goals.filter(g=>g.completedAt).sort((a,b)=>b.completedAt-a.completedAt).map((g,i)=>{
+                const cat = categories.find(c=>c.id===g.catId);
+                const fmtDate = (ts)=>{ if(!ts) return null; const d=new Date(ts); const m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']; return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`; };
+                const days = g.createdAt&&g.completedAt ? Math.round((g.completedAt-g.createdAt)/86400000) : null;
+                return (
+                  <div key={g.id} style={{ borderTop:'1px solid rgba(255,255,255,0.07)',paddingTop:12,paddingBottom:12,display:'flex',gap:10,animation:`rowIn 0.3s ease ${i*0.05}s both` }}>
+                    <span style={{ fontSize:16,lineHeight:1.5 }}>{cat?.emoji||'🎯'}</span>
+                    <div style={{ flex:1 }}>
+                      <div style={{ display:'flex',alignItems:'center',gap:6,marginBottom:4 }}>
+                        <span style={{ fontSize:13,fontWeight:500,color:'rgba(255,255,255,0.65)' }}>{g.name}</span>
+                        <span style={{ fontSize:10,color:'#7BE8B0',background:'rgba(123,232,176,0.1)',borderRadius:20,padding:'1px 7px',border:'1px solid rgba(123,232,176,0.2)' }}>✓</span>
+                      </div>
+                      <div style={{ display:'flex',gap:10,flexWrap:'wrap' }}>
+                        <span style={{ fontSize:11,color:'rgba(255,255,255,0.3)' }}>{g.target} {g.unit}</span>
+                        {g.createdAt&&<span style={{ fontSize:11,color:'rgba(255,255,255,0.25)' }}>Iniciada {fmtDate(g.createdAt)}</span>}
+                        {g.completedAt&&<span style={{ fontSize:11,color:'rgba(255,255,255,0.3)' }}>Terminada {fmtDate(g.completedAt)}</span>}
+                        {days!==null&&<span style={{ fontSize:11,color:'rgba(255,255,255,0.2)' }}>{days} días</span>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// ONBOARDING
+// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// SPLASH SCREEN
+// ══════════════════════════════════════════════════════════════
+function SplashScreen({ onStart }) {
+  const [fading, setFading] = useState(false);
+  const go = () => { setFading(true); setTimeout(onStart, 500); };
+  return (
+    <div style={{
+      position:'absolute', inset:0, zIndex:400,
+      background:'#0c0c12',
+      display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+      fontFamily:"'Inter',sans-serif", WebkitFontSmoothing:'antialiased',
+      opacity: fading ? 0 : 1, transition:'opacity 0.5s ease',
+    }}>
+      {/* Ambient glow */}
+      <div style={{ position:'absolute', top:'20%', left:'50%', transform:'translateX(-50%)', width:260, height:260, borderRadius:'50%', background:'radial-gradient(circle,rgba(123,143,232,0.14) 0%,transparent 70%)', pointerEvents:'none' }}/>
+
+      {/* Logo mark */}
+      <div style={{ marginBottom:24, animation:'fadeIn 0.6s ease' }}>
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <circle cx="28" cy="28" r="24" stroke="rgba(123,143,232,0.3)" strokeWidth="1"/>
+          {[0,1,2,3,4].map(i=>(
+            <circle key={i} cx={10+i*9} cy="28" r="5"
+              fill={i<3?"#7B8FE8":"transparent"}
+              stroke="#7B8FE8" strokeWidth="1.2"
+              opacity={i<3?0.9:0.3}/>
+          ))}
+        </svg>
+      </div>
+
+      {/* Name */}
+      <div style={{ fontSize:26, fontWeight:300, color:'rgba(255,255,255,0.88)', letterSpacing:-0.5, marginBottom:6, animation:'fadeIn 0.6s ease 0.1s both' }}>
+        AppHábitos
+      </div>
+      <div style={{ fontSize:13, fontWeight:300, color:'rgba(255,255,255,0.3)', marginBottom:56, animation:'fadeIn 0.6s ease 0.2s both', letterSpacing:0.1 }}>
+        construye hábitos, alcanza metas
+      </div>
+
+      {/* CTA */}
+      <button onClick={go} style={{
+        height:50, borderRadius:15, padding:'0 36px',
+        background:'rgba(123,143,232,0.18)',
+        border:'1px solid rgba(123,143,232,0.35)',
+        color:'#a5b4fc', fontSize:15, fontWeight:500,
+        cursor:'pointer', letterSpacing:0.1,
+        boxShadow:'0 4px 20px rgba(123,143,232,0.2)',
+        animation:'fadeIn 0.6s ease 0.35s both',
+        transition:'all 0.2s',
+      }}>
+        Iniciar
+      </button>
+    </div>
+  );
+}
+
+const OB_SLIDES = [
+  {
+    id: 'welcome',
+    accent: '#7B8FE8',
+    icon: (
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="28" stroke="#7B8FE8" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.4"/>
+        <circle cx="32" cy="32" r="18" fill="rgba(123,143,232,0.12)" stroke="#7B8FE8" strokeWidth="1"/>
+        <circle cx="32" cy="32" r="8" fill="#7B8FE8" opacity="0.9"/>
+      </svg>
+    ),
+    title: 'Bienvenido a\nAppHábitos',
+    body: 'Tu espacio para construir hábitos sólidos y alcanzar tus metas — un día a la vez.',
+  },
+  {
+    id: 'habitos',
+    accent: '#E87B8F',
+    icon: (
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+        {[0,1,2,3,4].map((i)=>(
+          <circle key={i} cx={10+i*14} cy="32" r="7"
+            fill={i<3?"#E87B8F":"transparent"}
+            stroke="#E87B8F" strokeWidth="1.5"
+            opacity={i<3?0.9:0.3}/>
+        ))}
+      </svg>
+    ),
+    title: 'Registra\ntus hábitos',
+    body: 'Marca cada día que cumples un hábito. Visualiza tu progreso semanal de un vistazo.',
+  },
+  {
+    id: 'metas',
+    accent: '#E8B87B',
+    icon: (
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+        <rect x="8" y="44" width="10" height="14" rx="2" fill="#E8B87B" opacity="0.35"/>
+        <rect x="22" y="32" width="10" height="26" rx="2" fill="#E8B87B" opacity="0.6"/>
+        <rect x="36" y="20" width="10" height="38" rx="2" fill="#E8B87B" opacity="0.85"/>
+        <rect x="50" y="10" width="10" height="48" rx="2" fill="#E8B87B"/>
+      </svg>
+    ),
+    title: 'Gestiona\ntus metas',
+    body: 'Organiza objetivos por categorías: libros, fitness, cursos. Suma progreso en segundos.',
+  },
+  {
+    id: 'start',
+    accent: '#7BE8B0',
+    icon: (
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="26" fill="rgba(123,232,176,0.1)" stroke="#7BE8B0" strokeWidth="1.5"/>
+        <path d="M22 32l8 8 12-16" stroke="#7BE8B0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    title: 'Todo listo\npara empezar',
+    body: 'Crea tu primer hábito ahora. Te llevará menos de 30 segundos.',
+  },
+];
+
+function OnboardingDot({ active, color }) {
+  return (
+    <div style={{
+      width: active ? 18 : 5, height: 5, borderRadius: 99,
+      background: active ? color : 'rgba(255,255,255,0.18)',
+      transition: 'all 0.35s cubic-bezier(0.34,1.3,0.64,1)',
+    }}/>
+  );
+}
+
+function Onboarding({ onComplete }) {
+  const [step, setStep]     = useState(0);
+  const [exiting, setExit]  = useState(false);
+  const [direction, setDir] = useState(1); // 1=fwd, -1=back
+  // For last slide: quick-create first habit
+  const [name,  setName]  = useState('');
+  const [emoji, setEmoji] = useState('🎯');
+  const [goal,  setGoal]  = useState(5);
+  const [color, setColor] = useState('#7B8FE8');
+
+  const slide = OB_SLIDES[step];
+  const isLast = step === OB_SLIDES.length - 1;
+
+  const goNext = () => {
+    setDir(1);
+    if (step < OB_SLIDES.length - 1) setStep(s => s + 1);
+  };
+  const goPrev = () => {
+    setDir(-1);
+    if (step > 0) setStep(s => s - 1);
+  };
+  const finish = (firstHabit) => {
+    setExit(true);
+    setTimeout(() => onComplete(firstHabit), 500);
+  };
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, zIndex: 400,
+      background: '#0c0c12',
+      display: 'flex', flexDirection: 'column',
+      fontFamily: "'Inter', sans-serif",
+      animation: exiting ? 'fadeOut 0.5s ease forwards' : 'fadeIn 0.4s ease',
+      WebkitFontSmoothing: 'antialiased',
+    }}>
+      <style>{`@keyframes fadeOut{to{opacity:0;transform:scale(1.04)}} @keyframes slideRight{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:translateX(0)}} @keyframes slideLeft{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}`}</style>
+
+      {/* Skip */}
+      {!isLast && (
+        <button onClick={()=>finish(null)} style={{ position:'absolute',top:70,right:22,background:'none',border:'none',color:'rgba(255,255,255,0.25)',fontSize:13,fontWeight:400,cursor:'pointer',zIndex:10,letterSpacing:0.1 }}>
+          Omitir
+        </button>
+      )}
+
+      {/* Ambient glow matching slide accent */}
+      <div style={{ position:'absolute',top:-60,left:'50%',transform:'translateX(-50%)',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle,${slide.accent}18 0%,transparent 70%)`,transition:'background 0.6s ease',pointerEvents:'none' }}/>
+
+      {/* Main content */}
+      <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 36px', position:'relative', overflow:'hidden' }}>
+
+        {/* Icon */}
+        <div key={`icon-${step}`} style={{ marginBottom:36, animation:`${direction>0?'slideLeft':'slideRight'} 0.4s cubic-bezier(0.34,1.1,0.64,1)` }}>
+          {slide.icon}
+        </div>
+
+        {/* Text */}
+        <div key={`text-${step}`} style={{ textAlign:'center', animation:`${direction>0?'slideLeft':'slideRight'} 0.4s cubic-bezier(0.34,1.1,0.64,1) 0.04s both` }}>
+          <div style={{ fontSize:26, fontWeight:300, color:'rgba(255,255,255,0.92)', letterSpacing:-0.6, lineHeight:1.2, marginBottom:14, whiteSpace:'pre-line' }}>
+            {slide.title}
+          </div>
+          <div style={{ fontSize:14, fontWeight:300, color:'rgba(255,255,255,0.45)', lineHeight:1.65, letterSpacing:0.1 }}>
+            {slide.body}
+          </div>
+        </div>
+
+        {/* Last slide: quick create */}
+        {isLast && (
+          <div key="create" style={{ width:'100%', marginTop:32, animation:'slideLeft 0.4s ease 0.1s both' }}>
+            <input
+              placeholder="¿Cuál será tu primer hábito?"
+              value={name} onChange={e=>setName(e.target.value)}
+              style={{ width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:14, padding:'13px 16px', color:'#fff', fontSize:15, fontWeight:300, outline:'none', fontFamily:'Inter', letterSpacing:-0.1, marginBottom:14 }}
+              autoFocus
+            />
+            {/* Emoji row */}
+            <div style={{ display:'flex', justifyContent:'center', gap:8, marginBottom:12 }}>
+              {['🎯','📚','🏃','💧','🧘','✍️','💪','🎨','☕'].map(e=>(
+                <button key={e} onClick={()=>setEmoji(e)} style={{ width:36,height:36,borderRadius:10,fontSize:17,background:emoji===e?`${color}22`:'rgba(255,255,255,0.05)',border:emoji===e?`1px solid ${color}55`:'1px solid transparent',cursor:'pointer' }}>{e}</button>
+              ))}
+            </div>
+            {/* Color row */}
+            <div style={{ display:'flex', justifyContent:'center', gap:9, marginBottom:12 }}>
+              {HABIT_COLORS.map(c=>(
+                <button key={c} onClick={()=>setColor(c)} style={{ width:24,height:24,borderRadius:'50%',background:c,border:color===c?'2px solid #fff':'2px solid transparent',cursor:'pointer',outline:'none',boxShadow:color===c?`0 0 0 3px ${c}44`:'none',flexShrink:0 }}/>
+              ))}
+            </div>
+            {/* Goal */}
+            <div style={{ display:'flex', gap:5 }}>
+              {[1,2,3,4,5,6,7].map(n=>(
+                <button key={n} onClick={()=>setGoal(n)} style={{ flex:1,height:34,borderRadius:10,fontSize:13,fontWeight:goal===n?700:300,background:goal===n?`${color}22`:'rgba(255,255,255,0.04)',color:goal===n?color:'rgba(255,255,255,0.35)',border:goal===n?`1px solid ${color}44`:'1px solid rgba(255,255,255,0.06)',cursor:'pointer' }}>{n}</button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Dots */}
+      <div style={{ display:'flex', justifyContent:'center', gap:7, marginBottom:24 }}>
+        {OB_SLIDES.map((_,i)=>(
+          <OnboardingDot key={i} active={i===step} color={slide.accent}/>
+        ))}
+      </div>
+
+      {/* Bottom actions */}
+      <div style={{ padding:'0 24px 48px', display:'flex', gap:10 }}>
+        {step > 0 && (
+          <button onClick={goPrev} style={{ width:48,height:52,borderRadius:15,background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.09)',color:'rgba(255,255,255,0.5)',fontSize:18,cursor:'pointer',flexShrink:0 }}>
+            ‹
+          </button>
+        )}
+        <button
+          onClick={() => {
+            if (isLast) finish(name.trim() ? { name: name.trim(), emoji, goal, color } : null);
+            else goNext();
+          }}
+          style={{
+            flex:1, height:52, borderRadius:15, border:'none', cursor:'pointer',
+            background: isLast && name.trim()
+              ? `linear-gradient(135deg,${color}dd,${color}99)`
+              : `linear-gradient(135deg,${slide.accent}cc,${slide.accent}88)`,
+            color:'#fff', fontSize:15, fontWeight:600, letterSpacing:-0.2,
+            boxShadow: `0 6px 24px ${slide.accent}44`,
+            transition:'all 0.3s',
+          }}
+        >
+          {isLast ? (name.trim() ? 'Crear y empezar →' : 'Empezar sin hábitos') : 'Continuar →'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// ROOT APP
+// ══════════════════════════════════════════════════════════════
+function App() {
+  const s = loadState();
+  const [onboarded,  setOnboarded]  = useState(()=>!!(s?.onboarded));
+  const [tab,        setTab]        = useState('habits');
+  const [habits,     setHabits]     = useState(s?.habits      || DEFAULT_HABITS);
+  const [allProg,    setAllProg]    = useState(s?.allProgress  || {});
+  const [goals,      setGoals]      = useState(s?.goals        || DEFAULT_GOALS);
+  const [categories] = useState(DEFAULT_CATEGORIES);
+  const [selectedCat,setSelectedCat]= useState(null); // for Metas detail
+  const [goalModal,  setGoalModal]  = useState(null); // { catId } | goal object
+
+  const wk = getWeekKey();
+  const curProg = allProg[wk]||{};
+
+  useEffect(()=>{ saveState({habits,allProgress:allProg,goals,onboarded}); },[habits,allProg,goals,onboarded]);
+
+  const handleOnboardingComplete = (firstHabit) => {
+    if (firstHabit) setHabits(p=>[...p,{id:Date.now(),...firstHabit}]);
+    setOnboarded(true);
+  };
+
+  const handleToggle = (hid,di,active)=>setAllProg(prev=>{ const wp={...(prev[wk]||{})}; const h=habits.find(h=>h.id===hid); const arr=Array.from({length:h?.goal||7},(_,i)=>wp[hid]?.[i]||false); arr[di]=active; return {...prev,[wk]:{...wp,[hid]:arr}}; });
+  const handleAddHabit    = d=>setHabits(p=>[...p,{id:Date.now(),...d}]);
+  const handleEditHabit   = (h,d)=>setHabits(p=>p.map(x=>x.id===h.id?{...x,...d}:x));
+  const handleDeleteHabit = id=>{ setHabits(p=>p.filter(h=>h.id!==id)); setAllProg(prev=>{ const n={}; for(const k in prev){const wp={...prev[k]};delete wp[id];n[k]=wp;} return n; }); };
+
+  const handleAddGoal    = d=>setGoals(p=>[...p,{id:Date.now(),createdAt:Date.now(),...d}]);
+  const handleEditGoal   = g=>setGoals(p=>p.map(x=>x.id===g.id?g:x));
+  const handleDeleteGoal = id=>setGoals(p=>p.filter(g=>g.id!==id));
+  const handleUpdateGoal = (id,newVal)=>setGoals(p=>p.map(g=>{ if(g.id!==id) return g; const newCur=Math.min(newVal,g.target); const justCompleted=newCur>=g.target&&!g.completedAt; return {...g,current:newCur,...(justCompleted?{completedAt:Date.now()}:{})}; }));
+
+  const TABS = [
+    { id:'habits',  label:'Hábitos' },
+    { id:'metas',   label:'Metas'   },
+    { id:'stats',   label:'Progreso' },
+    { id:'ajustes', label:'Ajustes' },
+  ];
+
+  // ── Export / Import helpers ──────────────────────────────────
+  const handleExport = () => {
+    const data = { habits, allProgress: allProg, goals, onboarded, exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const date = new Date().toISOString().slice(0,10);
+    a.href = url; a.download = `apphabitos_backup_${date}.json`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const d = JSON.parse(ev.target.result);
+        if (d.habits)      setHabits(d.habits);
+        if (d.allProgress) setAllProg(d.allProgress);
+        if (d.goals)       setGoals(d.goals);
+        setOnboarded(true);
+        alert('✅ Datos restaurados correctamente');
+      } catch { alert('❌ Archivo inválido'); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  return (
+    <IOSDevice dark={true} width={390} height={844}>
+      <div style={{ height:'100%',display:'flex',flexDirection:'column',position:'relative',background:'#0c0c12',fontFamily:"'Inter',sans-serif",WebkitFontSmoothing:'antialiased' }}>
+
+        {!onboarded && <SplashScreen onStart={()=>setOnboarded(true)}/>}
+        {/* Pulse ambient glow */}
+        <div style={{ position:'absolute',top:-80,left:'50%',transform:'translateX(-50%)',width:340,height:340,borderRadius:'50%',background:'radial-gradient(circle,rgba(124,111,247,0.10) 0%,transparent 70%)',pointerEvents:'none',zIndex:0 }}/>
+        <div style={{ position:'absolute',bottom:-60,right:-40,width:220,height:220,borderRadius:'50%',background:'radial-gradient(circle,rgba(180,100,255,0.06) 0%,transparent 70%)',pointerEvents:'none',zIndex:0 }}/>
+
+        {tab==='habits'&&(
+          <HabitsScreen habits={habits} curProg={curProg} allProg={allProg}
+            onToggle={handleToggle} onEdit={handleEditHabit} onDelete={handleDeleteHabit} onAdd={handleAddHabit}/>
+        )}
+
+        {tab==='metas'&&!selectedCat&&(
+          <MetasScreen categories={categories} goals={goals}
+            onSelectCat={setSelectedCat}
+            onAddGoal={handleAddGoal}
+            onEditGoal={handleEditGoal}
+            onDeleteGoal={handleDeleteGoal}
+            onUpdateGoal={handleUpdateGoal}/>
+        )}
+
+        {tab==='metas'&&selectedCat&&(
+          <CategoryDetail cat={selectedCat} goals={goals}
+            onBack={()=>setSelectedCat(null)}
+            onAdd={catId=>setGoalModal({catId})}
+            onEdit={handleEditGoal}
+            onDelete={handleDeleteGoal}
+            onUpdate={handleUpdateGoal}/>
+        )}
+
+        {tab==='stats'&&(
+          <div style={{ flex:1,overflow:'auto',paddingTop:62 }}>
+            <div style={{ padding:'0 24px 18px' }}>
+              <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>Resumen</div>
+              <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,marginBottom:24 }}>Progreso</div>
+            </div>
+            <StatsScreen habits={habits} goals={goals} categories={categories} allProgress={allProg}/>
+          </div>
+        )}
+
+        {tab==='ajustes'&&(
+          <div style={{ flex:1,overflow:'auto',paddingTop:62 }}>
+            <div style={{ padding:'0 24px 18px' }}>
+              <div style={{ fontSize:11,fontWeight:400,color:'rgba(255,255,255,0.45)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:7 }}>Datos</div>
+              <div style={{ fontSize:28,fontWeight:300,color:'rgba(255,255,255,0.92)',letterSpacing:-0.6,marginBottom:28 }}>Ajustes</div>
+            </div>
+
+            {/* Backup section */}
+            <div style={{ padding:'0 20px',display:'flex',flexDirection:'column',gap:12 }}>
+
+              {/* Info card */}
+              <div style={{ background:'rgba(123,143,232,0.08)',border:'1px solid rgba(123,143,232,0.18)',borderRadius:18,padding:'14px 16px',marginBottom:4 }}>
+                <div style={{ fontSize:12,color:'rgba(255,255,255,0.5)',lineHeight:1.6 }}>
+                  Tu progreso se guarda automáticamente en este dispositivo. Usa los botones de abajo para hacer una copia de seguridad o restaurar en otro dispositivo.
+                </div>
+              </div>
+
+              {/* Exportar */}
+              <button onClick={handleExport} style={{
+                width:'100%',height:54,borderRadius:16,border:'none',cursor:'pointer',
+                background:'linear-gradient(135deg,rgba(123,143,232,0.25),rgba(123,143,232,0.12))',
+                borderTop:'1px solid rgba(123,143,232,0.3)',
+                color:'#fff',fontSize:15,fontWeight:500,letterSpacing:-0.2,
+                display:'flex',alignItems:'center',justifyContent:'center',gap:10,
+              }}>
+                <span style={{ fontSize:20 }}>📤</span>
+                Exportar copia de seguridad
+              </button>
+
+              {/* Importar */}
+              <label style={{
+                width:'100%',height:54,borderRadius:16,cursor:'pointer',
+                background:'rgba(255,255,255,0.05)',
+                border:'1px solid rgba(255,255,255,0.1)',
+                color:'rgba(255,255,255,0.7)',fontSize:15,fontWeight:400,letterSpacing:-0.2,
+                display:'flex',alignItems:'center',justifyContent:'center',gap:10,
+                boxSizing:'border-box',
+              }}>
+                <span style={{ fontSize:20 }}>📥</span>
+                Restaurar desde archivo
+                <input type="file" accept=".json" onChange={handleImport} style={{ display:'none' }}/>
+              </label>
+
+              {/* Stats del backup */}
+              <div style={{ marginTop:8,padding:'12px 16px',background:'rgba(255,255,255,0.03)',borderRadius:14,border:'1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ fontSize:12,color:'rgba(255,255,255,0.35)',marginBottom:8 }}>Estado actual</div>
+                <div style={{ display:'flex',gap:20 }}>
+                  <div style={{ textAlign:'center' }}>
+                    <div style={{ fontSize:22,fontWeight:600,color:'#7B8FE8' }}>{habits.length}</div>
+                    <div style={{ fontSize:11,color:'rgba(255,255,255,0.4)' }}>Hábitos</div>
+                  </div>
+                  <div style={{ textAlign:'center' }}>
+                    <div style={{ fontSize:22,fontWeight:600,color:'#E8B87B' }}>{goals.length}</div>
+                    <div style={{ fontSize:11,color:'rgba(255,255,255,0.4)' }}>Metas</div>
+                  </div>
+                  <div style={{ textAlign:'center' }}>
+                    <div style={{ fontSize:22,fontWeight:600,color:'#7BE8B0' }}>{Object.keys(allProg).length}</div>
+                    <div style={{ fontSize:11,color:'rgba(255,255,255,0.4)' }}>Semanas</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* Goal modal from category detail */}
+        {goalModal&&(
+          <GoalModal catId={goalModal.catId} initial={goalModal.id?goalModal:null} categories={categories}
+            onSave={data=>{handleAddGoal({...data,createdAt:Date.now()});setGoalModal(null);}} onClose={()=>setGoalModal(null)}/>
+        )}
+
+        {/* Tab bar — 4 tabs */}
+        <div style={{ position:'absolute',bottom:0,left:0,right:0,height:76,display:'flex',alignItems:'flex-start',paddingTop:14,background:'rgba(12,12,18,0.94)',backdropFilter:'blur(20px)',borderTop:'1px solid rgba(255,255,255,0.07)',zIndex:50 }}>
+          {TABS.map(t=>{
+            const isActive = tab===t.id;
+            const accentColor = t.id==='metas'?'#E8B87B':t.id==='stats'?'#7BE8B0':t.id==='ajustes'?'#E87BB0':'#7B8FE8';
+            return (
+              <button key={t.id} onClick={()=>{ setTab(t.id); if(t.id!=='metas') setSelectedCat(null); }} style={{ flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:5,background:'none',border:'none',cursor:'pointer' }}>
+                <div style={{ width:isActive?24:4,height:2,borderRadius:99,background:isActive?`linear-gradient(90deg,${accentColor},${accentColor}88)`:'rgba(255,255,255,0.1)',transition:'width 0.3s cubic-bezier(0.34,1.3,0.64,1)',boxShadow:isActive?`0 0 10px ${accentColor}99`:'none' }}/>
+                <span style={{ fontSize:11,fontWeight:isActive?500:300,color:isActive?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.38)',transition:'color 0.2s,font-weight 0.2s' }}>{t.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </IOSDevice>
+  );
+}
+
+function Canvas() {
+  return (
+    <div style={{ minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse 80% 60% at 50% 40%, #14112a 0%, #090910 65%)',padding:32 }}>
+      <App/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Canvas/>);
+</script>
+<div id="root"></div>
+</body>
+</html>
