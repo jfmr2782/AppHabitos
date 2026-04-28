@@ -38,6 +38,18 @@ html { width:100%; height:100%; background:#0c0c12; }
 body { width:100%; height:100%; background:#0c0c12; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; overscroll-behavior:none; overflow:hidden; position:fixed; }
 #root { width:100%; height:100%; position:fixed; inset:0; background:#0c0c12; }
 ::-webkit-scrollbar { display:none; }
+.tab-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 14px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(12,12,18,0.94);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.07);
+  z-index: 50;
+}
 @keyframes dotIn { 0%{transform:scale(0.3);opacity:0} 60%{transform:scale(1.4)} 80%{transform:scale(0.92)} 100%{transform:scale(1);opacity:1} }
 @keyframes dotOut { 0%{transform:scale(1)} 40%{transform:scale(0.5)} 100%{transform:scale(1)} }
 @keyframes rowIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
@@ -1745,7 +1757,7 @@ function App() {
         )}
 
         {/* Tab bar */}
-        <div style={{ position:'absolute',bottom:0,left:0,right:0,display:'flex',alignItems:'flex-start',paddingTop:14,paddingBottom:'max(env(safe-area-inset-bottom), 20px)',background:'rgba(12,12,18,0.94)',backdropFilter:'blur(20px)',borderTop:'1px solid rgba(255,255,255,0.07)',zIndex:50 }}>
+        <div className='tab-bar'>
           {TABS.map(t=>{
             const isActive = tab===t.id;
             const accentColor = t.id==='metas'?'#E8B87B':t.id==='stats'?'#7BE8B0':t.id==='ajustes'?'#E87BB0':'#7B8FE8';
